@@ -1,0 +1,68 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: n8n node, Standards for naming classes, files, methods, and variables in n8n node development. [naming, conventions, class names, file names, variables, methods]
+globs: 
+alwaysApply: false
+---
+---
+description: n8n node, Standards for naming classes, files, methods, and variables in n8n node development. [naming, conventions, class names, file names, variables, methods]
+globs: 
+---
+# Naming Conventions for n8n Nodes
+
+1. Node Class Names
+   - Use PascalCase
+   - End with "Node" suffix (e.g., `AutotaskTicketNode`)
+   - For trigger nodes, include "Trigger" before "Node" (e.g., `AutotaskTicketTriggerNode`)
+
+2. File Names
+   - Use kebab-case
+   - End with `.node.ts` for node files
+   - End with `.credentials.ts` for credential files
+   - Examples:
+     - `autotask-ticket.node.ts`
+     - `autotask-api.credentials.ts`
+
+3. Method Names
+   - Use camelCase
+   - Action methods should start with 'on' (e.g., `onExecute`)
+   - Helper methods should be descriptive (e.g., `validateCredentials`)
+
+4. Variable Names
+   - Use camelCase
+   - Use meaningful and descriptive names
+   - Prefix private properties with underscore
+   - Use TypeScript types appropriately
+
+5. Resource Names
+   - Use PascalCase for interfaces and types
+   - Use ALL_CAPS for constants
+   - Use camelCase for properties and parameters
+
+6. Resource Descriptions
+   - Use Australian English spelling
+   - Start with the appropriate action verb:
+     - Use "Query" for read-only resources
+     - Use "Manage" for resources with full CRUD operations
+   - Maintain the primary entity name exactly as in the system (e.g., "Billing Codes")
+   - Include alternative or UI names in parentheses when relevant (e.g., "Billing Codes (Allocation Codes)")
+   - Use a "which" clause to concisely explain the entity's purpose
+   - Use "such as" for examples rather than exhaustive lists
+   - Consolidate similar types where possible
+   - Prioritise information by importance, including only the most common or important types
+   - Omit technical implementation details
+   - Keep descriptions concise (aim for 12-18 words after the entity name)
+   - Focus on what the entity represents functionally
+   - Use simple comma separation rather than complex sentences
+
+   Examples:
+     - "Query Billing Codes (Allocation Codes), which categorise billing items such as work types, materials, expenses, and services"
+     - "Manage Product Associations, which map configuration items (assets) to contract billing rules"
+
+## Dependencies
+[n8n-build-file_structure.mdc](mdc:.cursor/rules/n8n-build-file_structure.mdc)
+[n8n-build-code_standards.mdc](mdc:.cursor/rules/n8n-build-code_standards.mdc)

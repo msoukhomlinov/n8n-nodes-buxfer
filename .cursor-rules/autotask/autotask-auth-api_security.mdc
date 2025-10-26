@@ -1,0 +1,62 @@
+---
+description: authentication,security,API;Configure secure access and authentication requirements for Autotask REST API integration
+globs: 
+alwaysApply: false
+---
+---
+description: authentication,security,API;Configure secure access and authentication requirements for Autotask REST API integration
+globs:
+---
+
+# Autotask REST API Security & Authentication
+
+## Authentication Requirements
+
+Authentication to the Autotask REST API requires specific credentials and headers. Failed authentication results in a 401 error.
+
+### Required Headers
+
+```plaintext
+Username: "apiuser@example.com"
+Secret: "abc123"
+APIIntegrationcode: "ASHJKLFDKAHKASLFH85LSA905H"
+ContentType: "application/json"
+```
+
+## Security Levels
+
+### API User (API-only) Access
+- Provides full system administrator access via REST API
+- No access to Autotask UI
+- No per-seat charge
+- No limit on API-only user assignments
+- Allows individualized credentials for integration partners
+
+### Benefits
+- No need to share full Autotask credentials
+- Partner-specific credential management
+- Enhanced tracking and diagnostics capabilities
+- Integration activity monitoring
+
+## Security Configuration
+
+The API User security level can be modified to:
+- Restrict access to specific modules
+- Limit feature availability
+- Control data access permissions
+
+Note: Restricted licenses may result in no API response even when data exists.
+
+## Encryption Requirements
+
+- TLS 1.2 protocol required for:
+  - Inbound connections to Autotask.net
+  - All API calls
+  - Partner integrations
+  - Custom integrations
+
+## SSO Considerations
+
+- REST API does not support Single Sign-On (SSO)
+- Uses pre-SSO Autotask credentials if SSO is enabled
+- Passwords do not expire for API access

@@ -1,0 +1,141 @@
+---
+description: CRUD, Endpoints, Data; Learn how to create, update, and delete resources using Autotask REST API
+globs: 
+alwaysApply: false
+---
+---
+description: CRUD, Endpoints, Data; Learn how to create, update, and delete resources using Autotask REST API
+globs:
+---
+
+# Data Operations Guide
+
+## Create Operations (POST)
+
+### Basic POST Request
+```
+POST /ATServicesRest/V1.0/Companies
+Content-Type: application/json
+
+{
+    "companyName": "Example Corp",
+    "phone": "+61 2 1234 5678",
+    "active": true
+}
+```
+
+### POST Response
+```json
+{
+    "item": {
+        "id": 12345,
+        "companyName": "Example Corp",
+        "phone": "+61 2 1234 5678",
+        "active": true
+    }
+}
+```
+
+## Update Operations
+
+### PATCH (Partial Update)
+```
+PATCH /ATServicesRest/V1.0/Companies/12345
+Content-Type: application/json
+
+{
+    "phone": "+61 2 8765 4321"
+}
+```
+
+### PUT (Full Update)
+```
+PUT /ATServicesRest/V1.0/Companies/12345
+Content-Type: application/json
+
+{
+    "companyName": "Example Corp Updated",
+    "phone": "+61 2 8765 4321",
+    "active": true
+}
+```
+
+## Delete Operations
+
+### Basic DELETE Request
+```
+DELETE /ATServicesRest/V1.0/Companies/12345
+```
+
+## Bulk Operations
+
+### Bulk Create
+```json
+{
+    "items": [
+        {
+            "companyName": "Company A",
+            "active": true
+        },
+        {
+            "companyName": "Company B",
+            "active": true
+        }
+    ]
+}
+```
+
+### Bulk Update
+```json
+{
+    "items": [
+        {
+            "id": 12345,
+            "active": false
+        },
+        {
+            "id": 12346,
+            "active": false
+        }
+    ]
+}
+```
+
+## Best Practices
+
+### Data Validation
+1. Validate required fields
+2. Check field data types
+3. Verify field length limits
+4. Handle special characters
+5. Validate business rules
+
+### Error Handling
+- Check response status codes
+- Process error messages
+- Implement retry logic
+- Log failed operations
+- Handle partial success in bulk operations
+
+### Performance Tips
+- Use bulk operations for multiple items
+- Limit bulk operation size
+- Implement proper error recovery
+- Consider rate limits
+- Cache reference data
+
+## Common Status Codes
+- 201: Created successfully
+- 200: Updated successfully
+- 204: Deleted successfully
+- 400: Invalid request
+- 404: Resource not found
+- 409: Conflict
+- 422: Validation error
+
+## Field Requirements
+- Required fields must be included
+- Optional fields can be omitted
+- Read-only fields are ignored
+- System fields are auto-populated
+- UDFs require special handling

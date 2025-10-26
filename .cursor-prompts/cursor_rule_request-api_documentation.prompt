@@ -1,0 +1,91 @@
+# Task
+Create or update n8n node integration guide by combining API documentation from provided URL with any existing related knowledge base content.
+
+Ah, let me make that more specific and technical. Here's the improved version of that section:
+
+# Initial Steps
+1. Knowledge Base Check:
+- Search for existing .md files in project root directory
+- Command: `find . -maxdepth 1 -name "*.md"`
+- If matching files found:
+  - Parse files matching [product]-* pattern
+  - Review content and structure of matched files
+  - Map current categorization and file organization
+  - Create inventory of current content
+- If no matching files found:
+  - Proceed with new documentation structure
+
+2. Content Merge Strategy:
+- Compare existing KB content with new API documentation
+- Identify:
+  - Overlapping information
+  - Unique valuable content from existing KB
+  - New information to add
+  - Outdated content to remove
+- Preserve useful examples and troubleshooting tips
+
+# Output Format
+```yaml
+---
+description: [3 keywords];[12-15 word action-focused description]
+globs:
+---
+[Technical content in markdown]
+```
+
+# File Organization Rules
+1. Content Length:
+- If content exceeds 150 lines, split into multiple files
+- Each file should ideally contain 100-150 lines
+- Maintain logical grouping when splitting
+
+2. File Naming Convention:
+Base format: [product]-[category]-[major_section]_[subcategory].md
+- Product: API being documented (e.g., autotask)
+- Categories (choose most specific):
+  - setup: Initial configuration, authentication, prerequisites
+  - endpoints: API endpoint documentation, request/response formats
+  - workflows: Integration patterns, common use cases
+  - auth: Authentication and authorization specifics
+  - errors: Error handling, troubleshooting guides
+  - advanced: Performance optimization, advanced features
+  - examples: Code samples and implementation examples
+- Use hyphens (-) for major sections
+- Use underscores (_) for subcategories
+
+3. When Splitting Files:
+- Add numerical suffix: [base_name]-part1.md, [base_name]-part2.md
+- Include cross-references between related files
+- Create a main index file listing all parts
+
+# Content Guidelines
+Technical Focus:
+- Emphasize implementation details
+- Group related concepts together
+- Exclude general knowledge
+- Include only n8n node creation essentials
+
+Description Requirements:
+- Include keywords relevant to automation tasks
+- Align with AI agent functionality
+- Focus on specific technical outcomes
+- Follow format: [3 keywords];[12-15 word action-focused description]
+
+# File Management
+1. Creating New Content:
+- Follow standard naming and organization rules
+- Create new files as needed
+- Ensure proper cross-referencing
+
+2. Updating Existing Content:
+- Preserve valuable existing content
+- Update outdated information
+- Maintain existing file names where appropriate
+- Add new files as needed
+- Update cross-references
+
+3. Cleanup Process:
+- Identify obsolete files
+- Archive or remove outdated content
+- Update index files and references
+- Document significant changes in commit message

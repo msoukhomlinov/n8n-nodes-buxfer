@@ -1,0 +1,59 @@
+---
+description: Child Resources, Collections, Relationships;Guide for accessing and managing nested resource collections in Autotask API
+globs: 
+alwaysApply: false
+---
+---
+description: Child Resources, Collections, Relationships;Guide for accessing and managing nested resource collections in Autotask API
+globs:
+---
+
+# Child Resource Collections
+
+The Autotask API supports accessing child resources through parent-child relationship endpoints. These endpoints allow you to manage related entities efficiently.
+
+## Child Resource URL Pattern
+Child resources follow this URL structure:
+```
+/atservicesrest/v1.0/ParentEntity/{parentId}/ChildEntity
+```
+
+## Standard Child Resource Operations
+
+| HTTP Method | Endpoint Pattern | Purpose |
+|------------|-----------------|----------|
+| GET | `/ParentEntity/{parentId}/ChildEntity` | List all child resources |
+| GET | `/ParentEntity/{parentId}/ChildEntity/{childId}` | Get specific child |
+| GET | `/ParentEntity/{parentId}/ChildEntity/query` | Query child resources |
+| POST | `/ParentEntity/{parentId}/ChildEntity` | Create child resource |
+| PUT | `/ParentEntity/{parentId}/ChildEntity` | Update child resources |
+| DELETE | `/ParentEntity/{parentId}/ChildEntity/{childId}` | Remove child resource |
+
+## Implementation Notes
+
+1. Parent ID Requirements:
+   - Must be valid and existing
+   - Required for all child resource operations
+   - Used to establish context for child operations
+
+2. Child Resource Constraints:
+   - Some child resources are read-only
+   - Creation/deletion may be restricted
+   - Relationship rules must be followed
+
+3. Query Support:
+   - Child resources support standard query operations
+   - Filtering specific to child context
+   - Pagination works as with primary resources
+
+## Best Practices
+
+1. Always validate parent resource existence before child operations
+2. Use batch operations when managing multiple children
+3. Consider resource limits and API thresholds
+4. Cache parent-child relationships where appropriate
+5. Implement proper error handling for relationship constraints
+
+## Related Documentation
+[autotask-endpoints-api_resource-access.mdc](mdc:.cursor/rules/autotask-endpoints-api_resource-access.mdc)
+[autotask-endpoints-api_query-operations.mdc](mdc:.cursor/rules/autotask-endpoints-api_query-operations.mdc)

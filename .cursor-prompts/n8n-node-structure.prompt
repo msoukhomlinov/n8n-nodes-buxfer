@@ -1,0 +1,89 @@
+Analyze or create n8n node structure following these guidelines:
+
+Directory Structure:
+```
+src/
+  nodes/
+    {NodeName}/
+      descriptions/     # Parameter descriptions
+        resource1.description.ts
+        resource2.description.ts
+        index.ts
+      resources/       # Resource implementations
+        resource1/
+          resource1.types.ts
+          resource1.handler.ts
+        resource2/
+          resource2.types.ts
+          resource2.handler.ts
+        index.ts
+      utils/          # Utility functions
+        GenericFunctions.ts
+        constants.ts
+      optionLoaders/  # Dynamic option loaders
+        loader1.ts
+        loader2.ts
+      {NodeName}.node.ts  # Main node file
+```
+
+File Responsibilities:
+1. Main Node File (.node.ts):
+   - Implement INodeType interface
+   - Define node metadata
+   - Register resources/operations
+   - Handle execution routing
+   - Define node properties
+
+2. Resource Types (.types.ts):
+   - Define interfaces
+   - Specify operation types
+   - Include JSDoc comments
+   - Define response types
+   - Specify parameter types
+
+3. Resource Handlers (.handler.ts):
+   - Implement CRUD operations
+   - Handle API communication
+   - Manage error handling
+   - Implement retry logic
+   - Process responses
+
+4. Descriptions (.description.ts):
+   - Define node parameters
+   - Specify validation rules
+   - Provide field descriptions
+   - Handle dynamic fields
+   - Define options/choices
+
+5. Utils:
+   - Generic API functions
+   - Common helper methods
+   - Constants/configurations
+   - Type guards/validators
+   - Shared utilities
+
+6. Option Loaders:
+   - Dynamic field population
+   - Resource lookups
+   - Dependent fields
+   - Cached options
+
+Configuration Files:
+1. package.json:
+   - Define dependencies
+   - Specify n8n metadata
+   - Configure scripts
+   - Set node version
+
+2. tsconfig.json:
+   - Configure TypeScript
+   - Set compiler options
+   - Define paths
+   - Specify includes/excludes
+
+3. .eslintrc:
+   - Set linting rules
+   - Configure plugins
+   - Define code style
+
+The node structure should:

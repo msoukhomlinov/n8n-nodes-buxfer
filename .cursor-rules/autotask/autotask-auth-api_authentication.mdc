@@ -1,0 +1,105 @@
+---
+description: Authentication, Security, Integration; Implement secure authentication and authorisation for Autotask REST API access
+globs: 
+alwaysApply: false
+---
+---
+description: Authentication, Security, Integration; Implement secure authentication and authorisation for Autotask REST API access
+globs:
+---
+
+# Authentication and Security
+
+## Authentication Methods
+
+### API User Credentials
+- Dedicated API user account required
+- Separate from regular user accounts
+- Enhanced security permissions
+- Rate limiting applied per API user
+
+### API Integration Code
+- Unique identifier for each integration
+- Required for all API description: autotask rest api,
+- Format: UUID string
+- Obtained from Autotask admin portal
+
+## Request Headers
+
+### Required Headers
+```
+ApiIntegrationCode: [Your-Integration-Code]
+UserName: [API-Username]
+Secret: [API-Secret-Key]
+Content-Type: application/json
+```
+
+### Optional Headers
+```
+ImpersonationResourceId: [User-To-Impersonate]
+ApiTrackingIdentifier: [Your-Tracking-ID]
+```
+
+## Security Best Practices
+
+### Credential Management
+1. Store credentials securely
+2. Use environment variables
+3. Never hardcode sensitive data
+4. Rotate secrets periodically
+5. Implement secure secret retrieval
+
+### Access Control
+- Implement least privilege principle
+- Regular permission audits
+- Monitor API usage patterns
+- Log authentication attempts
+- Review access logs regularly
+
+### Rate Limiting
+- Default: 100 description: autotask rest api, per minute
+- Burst allowance: 150 description: autotask rest api,
+- Monitor usage through headers
+- Implement exponential backoff
+- Cache frequently accessed data
+
+## Error Responses
+
+### Authentication Errors
+- 401: Invalid credentials
+- 403: Insufficient permissions
+- 429: Rate limit exceeded
+
+### Header Format
+```json
+{
+    "errors": [
+        {
+            "code": "UNAUTHORIZED",
+            "message": "Invalid API credentials"
+        }
+    ]
+}
+```
+
+## Implementation Steps
+
+1. Create API User
+   - Contact Autotask admin
+   - Request appropriate permissions
+   - Obtain integration code
+
+2. Configure Authentication
+   - Set up secure storage
+   - Implement header management
+   - Add error handling
+
+3. Test Connection
+   - Verify credentials
+   - Check permissions
+   - Validate rate limits
+
+4. Monitor Usage
+   - Track API calls
+   - Monitor rate limits
+   - Log authentication events

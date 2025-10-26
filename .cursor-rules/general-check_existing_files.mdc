@@ -1,0 +1,43 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: Before creating new files, folders, functions or code implementations, perform thorough codebase searches to prevent duplication. Search for existing files, similar implementations, related functions, and reusable code. Use workspace search features to scan for matching filenames, function signatures, class definitions, and code patterns. Consider extending or refactoring existing solutions rather than creating new ones. This helps maintain DRY principles and code consistency.
+globs: *.ts
+---
+When creating new files, folders, functions or components, always search the codebase first to avoid duplicating existing code. This includes:
+
+1. Search for similar file/folder names
+2. Look for matching function signatures and implementations
+3. Check for existing components with similar purposes
+4. Review related code patterns and structures
+
+# Key operations to check before creating:
+- New file creation
+- Directory/folder creation 
+- Function implementation
+- Component scaffolding
+- Service layer additions
+- Interface definitions
+- Project initialization
+- Code generation
+
+# Search terms should include:
+- Target file/folder names
+- Function names and signatures
+- Class and component names
+- Common implementation patterns
+- Related business logic terms
+- Domain-specific keywords
+
+# Steps to validate:
+1. Use codebase search to find potential matches
+2. Review any similar implementations
+3. Consider extending existing code instead of duplicating
+4. Check version control history
+5. Review project documentation
+6. Validate with team members if needed
+
+This rule helps maintain a DRY codebase by preventing accidental duplication of files, folders and implementations.

@@ -1,0 +1,123 @@
+---
+description: n8n node, Standards for implementing basic field types in n8n node development, including toggles, lists, IDs, and dates. [field types, input, validation]
+globs: 
+alwaysApply: false
+---
+---
+description: n8n node, Standards for implementing basic field types in n8n node development, including toggles, lists, IDs, and dates. [field types, input, validation]
+globs: 
+---
+# n8n Node Basic Field Types Standards
+
+1. Toggle Fields
+   ```typescript
+   // Clear toggle usage
+   {
+     displayName: 'Simplify Output',  // Clear what happens when false
+     name: 'simplifyOutput',
+     type: 'boolean',
+     default: true,
+     description: 'Whether to return a simplified version of the response',
+   },
+
+   // When toggle isn't clear enough, use options instead
+   {
+     displayName: 'Append Mode',      // Unclear what happens when false
+     name: 'appendMode',
+     type: 'options',
+     options: [
+       {
+         name: 'Append to Existing',
+         value: 'append',
+       },
+       {
+         name: 'Overwrite Existing',
+         value: 'overwrite',
+       }
+     ],
+   }
+   ```
+
+2. List Fields
+   ```typescript
+   // Options list with descriptions
+   {
+     displayName: 'Operation',
+     name: 'operation',
+     type: 'options',
+     options: [
+       {
+         name: 'Create',
+         value: 'create',
+         description: 'Create a new record',  // Optional description
+       }
+     ],
+     default: 'create',  // Set most common option as default
+   },
+
+   // Multi-select list
+   {
+     displayName: 'Fields',
+     name: 'fields',
+     type: 'multiOptions',
+     options: [
+       {
+         name: 'Email',
+         value: 'email',
+       }
+     ],
+     default: [],  // Empty array for multi-select
+   }
+   ```
+
+3. ID Fields
+   ```typescript
+   // Support both list selection and direct ID input
+   {
+     displayName: 'Workspace Name or ID',
+     name: 'workspaceId',
+     type: 'string',
+     hint: 'Choose from the list or specify an ID using an expression',
+     default: '',
+     description: 'The workspace to operate on',
+     typeOptions: {
+       loadOptionsMethod: 'getWorkspaces',
+     },
+   }
+   ```
+
+4. Date Fields
+   ```typescript
+   // Support all ISO 8601 formats
+   {
+     displayName: 'Due Date',
+     name: 'dueDate',
+     type: 'dateTime',
+     default: '',
+     description: 'Task due date (ISO 8601 format)',
+     validateType: 'dateTime',
+   }
+   ```
+
+5. Type Selection
+   - Choose appropriate type for data
+   - Consider user experience
+   - Support multiple input methods
+   - Provide clear validation
+
+6. Default Values
+   - Set sensible defaults
+   - Document default behaviour
+   - Handle empty values
+   - Consider edge cases
+
+7. Validation
+   - Implement appropriate validation
+   - Provide clear error messages
+   - Handle edge cases
+   - Support all formats
+
+## Dependencies
+[n8n-build-ui-design_standards.mdc](mdc:.cursor/rules/n8n-build-ui-design_standards.mdc)
+[n8n-build-ui-text_and_naming.mdc](mdc:.cursor/rules/n8n-build-ui-text_and_naming.mdc)
+[n8n-build-ui-error_handling.mdc](mdc:.cursor/rules/n8n-build-ui-error_handling.mdc)

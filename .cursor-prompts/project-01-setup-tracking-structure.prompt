@@ -1,0 +1,426 @@
+# PROJECT TRACKER GENERATOR AND SETUP PROMPT
+# Purpose: Interactive project structure setup and tracking initialization
+# Usage: Initial project setup and tracking structure generation
+
+# EXECUTION ORDER - MUST FOLLOW SEQUENTIALLY:
+1. Interactive Questions (MUST be completed first)
+2. Git Setup (MUST be completed second)
+3. Directory Creation
+4. File Creation
+5. Notepad Setup
+
+# VALIDATION CHECKPOINTS:
+- ✓ All interactive questions answered
+- ✓ Git setup completed
+- ✓ Directory structure verified
+- ✓ All files created
+- ✓ All notepads initialized
+
+# COMPLETION REQUIREMENTS:
+1. DO NOT proceed to next step until current step is complete
+2. Each interactive question MUST be asked and answered separately
+3. Each file creation MUST be confirmed
+4. Each setup phase MUST be validated
+
+# RESPONSE FORMAT:
+1. Ask all interactive questions first
+2. Wait for user responses
+3. Confirm understanding of responses
+4. Proceed with setup in specified order
+5. Validate each step before proceeding
+
+# IMPLEMENTATION STRUCTURE
+## Directory Layout
+   ```
+   .project-tracker/           # Project tracking root
+   ├── notepads/             # Project notepads
+   │   ├── goals.yaml       # Quality and architectural objectives
+   │   ├── context.yaml     # Project state and focus areas
+   │   ├── progress.yaml    # Work tracking and status
+   │   └── knowledge.yaml   # Best practices and lessons learned
+   ├── core/                # Core project info
+   │   ├── project.yaml    # Project definition
+   │   └── tech.yaml       # Technical stack
+   ├── progress/           # Progress tracking
+   │   └── phases.yaml     # Phase/task tracking
+   └── records/            # Project records
+       ├── decisions/      # Key decisions
+       └── lessons/        # Lessons learned
+   ```
+
+## Notepad System Overview
+The project uses a system of interconnected notepads to track different aspects of development.
+Each notepad serves a specific purpose and together they provide a comprehensive view of the project:
+
+Purpose of Notepads:
+- Goals: Maintains quality targets and architectural vision
+- Context: Tracks current state and focus areas
+- Progress: Records work status and planning
+- Knowledge: Captures learnings and best practices
+
+Notepad Usage:
+- Updated through project lifecycle
+- Referenced by automation rules
+- Used for status reporting
+- Guides decision making
+
+## Notepad Templates
+1. Project Goals Notepad:
+   ```yaml
+   .project-tracker/notepads/goals.yaml:
+     quality_objectives:
+       - Test coverage targets
+       - Security requirements
+       - Performance SLAs
+       - Maintainability metrics
+
+     architectural_principles:
+       - Design patterns
+       - Code organisation
+       - System architecture
+       - Integration patterns
+
+     development_standards:
+       - Coding guidelines
+       - Documentation requirements
+       - Testing standards
+       - Performance criteria
+   ```
+
+2. Context Persistence Notepad:
+   ```yaml
+   .project-tracker/notepads/context.yaml:
+     project_state:
+       current_phase: null  # Updated during phase transitions
+       priority_areas: []   # Updated during planning
+       known_issues: []     # Maintained throughout development
+
+     focus_areas:
+       current_priorities: []
+       blocked_items: []
+       technical_constraints: []
+   ```
+
+3. Progress Tracking Notepad:
+   ```yaml
+   .project-tracker/notepads/progress.yaml:
+     completed_items:
+       phases: []
+       features: []
+       reviews: []
+
+     ongoing_work:
+       active_tasks: []
+       in_review: []
+       pending_deployment: []
+
+     upcoming_work:
+       planned_tasks: []
+       backlog_items: []
+       future_considerations: []
+   ```
+
+4. Knowledge Base Notepad:
+   ```yaml
+   .project-tracker/notepads/knowledge.yaml:
+     best_practices:
+       language_specific: {}    # Populated per technology
+       architecture: {}         # Architectural decisions
+       testing: {}             # Testing strategies
+
+     lessons_learned:
+       successes: []
+       challenges: []
+       improvements: []
+
+     technical_debt:
+       identified: []
+       prioritised: []
+       resolved: []
+   ```
+
+# IMPLEMENTATION SEQUENCE
+## 1. Interactive Setup
+DO NOT PROCEED PAST THIS SECTION UNTIL ALL QUESTIONS ARE ANSWERED
+
+1. # PROJECT IDENTIFICATION
+   ```
+   Q: Project name?
+   Q: One-line project description?
+   Q: Primary project objective?
+   Q: Initial version number?
+   Q: Quality/compliance requirements?
+   ```
+
+2. # TECHNICAL STACK
+   ```
+   Q: Core technologies? (languages/frameworks)
+   Q: External dependencies?
+   Q: Key technical constraints?
+   ```
+
+3. # SUCCESS METRICS
+   ```
+   Q: Business success criteria?
+   Q: Technical success criteria?
+   Q: Key deliverables?
+   ```
+
+4. # PHASE DEFINITION
+   Will propose phases based on inputs.
+   ```
+   Phase Proposal:
+   1. [Phase] - [Purpose]
+   2. [Phase] - [Purpose]
+   Approve? (yes/no)
+   ```
+
+5. # TASK BREAKDOWN
+   For each phase:
+   ```
+   Tasks for [Phase]:
+   1.1 [Task] - [Purpose]
+   1.2 [Task] - [Purpose]
+   Approve? (yes/no)
+   ```
+
+## 2. Git Setup
+MUST CREATE FIRST:
+```
+# Create comprehensive .gitignore file:
+.gitignore:
+  # Cursor specific
+  .cursorcache
+  .cursorconfig
+  .cursorignore
+  .cursor/
+  .cursor-rules/
+  .cursor-search-cache
+  .cursor-settings.json
+  .cursor-keybindings.json
+
+  # Optional Cursor team files (uncomment if not sharing)
+  #.cursor-snippets/
+  #.cursor-prompts/
+
+  # Project tracking
+  .project-tracker/
+
+  # Dependencies
+  node_modules/
+  npm-debug.log*
+  yarn-debug.log*
+  yarn-error.log*
+  package-lock.json
+  yarn.lock
+
+  # Build outputs
+  dist/
+  build/
+  *.tsbuildinfo
+  *.map
+  *.d.ts
+
+  # Test coverage
+  coverage/
+  .nyc_output/
+
+  # IDE and editor
+  .idea/*
+  .vscode/*
+  !.vscode/settings.json
+  !.vscode/tasks.json
+  !.vscode/launch.json
+  !.vscode/extensions.json
+  *.sublime-*
+  *.swp
+  *.swo
+  *.suo
+  *.ntvs*
+  *.njsproj
+  *.sln
+
+  # Environment variables
+  .env
+  .env.*
+  !.env.example
+
+  # OS specific
+  .DS_Store
+  Thumbs.db
+
+  # Database
+  *.sqlite
+  *.sqlite3
+
+  # Temporary files
+  .tmp/
+  .temp/
+  *.tmp
+
+  # Documentation
+  .docs/
+
+  # Cache
+  .cache/
+```
+
+## 3. File Creation
+VERIFY EACH FILE IS CREATED WITH PROPER CONTENT:
+
+### project.yaml
+```yaml
+# Project Definition
+project:
+  name: [Name]
+  description: [Description]
+  version: [Version]  # Semantic versioning
+  objective: [Objective]
+  quality_requirements:
+    - requirement: [Requirement]
+      validation: [Validation method]
+  success_criteria:
+    business: [Criteria]
+    technical: [Criteria]
+  dependencies:
+    required:
+      - name: [Package]
+        version: [Version]
+    development:
+      - name: [DevPackage]
+        version: [Version]
+  configuration:
+    linting:
+      - eslint
+      - prettier
+    testing:
+      framework: jest
+      coverage:
+        statements: 80
+        branches: 80
+        functions: 80
+        lines: 80
+```
+
+### tech.yaml
+```yaml
+# Technical Stack
+stack:
+  core: [Technologies]
+  dependencies: [Dependencies]
+  constraints: [Constraints]
+  quality_gates:
+    - gate: [Quality check]
+      criteria: [Pass criteria]
+  development:
+    language:
+      name: [Language]
+      version: [Version]
+      config:
+        strict: true
+        moduleSystem: [System]
+    framework:
+      name: [Framework]
+      version: [Version]
+    database:
+      type: [Type]
+      orm: [ORM]
+    testing:
+      unit: [Framework]
+      integration: [Framework]
+      e2e: [Framework]
+```
+
+### phases.yaml
+```yaml
+# Implementation Progress
+phases:
+  1:
+    name: [Phase]
+    status: pending  # pending | in_progress | completed
+    calibration:
+      start:
+        - Verify phase requirements
+        - Confirm prerequisites met
+      end:
+        - Quality review
+        - Deliverables check
+    tasks:
+      1.1:
+        name: [Task]
+        status: pending
+        technical_details:
+          implementation: [Details]
+          dependencies: [Required packages]
+          testing: [Test requirements]
+```
+
+### lessons.yaml
+```yaml
+# Phase Lessons
+phase: [Number]
+categories:
+  [Category]:
+    learnings:
+      - observation: [What was learned]
+        impact: [How it affects the project]
+        improvement: [How to improve]
+    common_pitfalls:
+      - issue: [What to watch for]
+        prevention: [How to prevent]
+```
+
+# VERIFICATION AND SYNCHRONIZATION
+## Setup Process
+VERIFY EACH STEP IS COMPLETE BEFORE PROCEEDING:
+1. Gather project information
+2. Define phases and tasks
+3. Setup tracking structure
+4. Initialize tracking files
+5. Setup development environment:
+   - Initialize version control
+   - Setup dependency management
+   - Configure linting and formatting
+   - Setup testing framework
+   - Configure build process
+6. Setup phase calibration points
+7. Initialize documentation
+
+## Notepad Synchronization
+VERIFY ALL CONNECTIONS ARE ESTABLISHED:
+
+1. Goals ↔ Progress
+   - Progress is measured against goals
+   - Goals are refined based on progress
+   - Milestones trigger goal verification
+
+2. Context ↔ Progress
+   - Current state affects priority
+   - Progress updates project state
+   - Blocked items influence focus
+
+3. Progress ↔ Knowledge
+   - Learnings from progress tracked
+   - Best practices influence work
+   - Technical debt identified
+
+4. Knowledge ↔ Goals
+   - Goals shaped by learnings
+   - Architecture evolves with knowledge
+   - Standards refined by experience
+
+## Final Validation
+Verify completion of:
+- All interactive questions answered
+- Git setup complete
+- Directory structure created
+- All files initialized
+- All notepads synchronized
+- All tracking mechanisms active
+
+This creates a maintainable, phase-oriented project tracking structure with:
+- Quality controls
+- Technical specifications
+- Learning capture
+- Progress monitoring
+- Knowledge management

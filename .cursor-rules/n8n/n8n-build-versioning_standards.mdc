@@ -1,0 +1,158 @@
+---
+description: n8n node, Standards for implementing versioning in n8n node development, including light and full versioning approaches. [versioning, compatibility, updates]
+globs: 
+alwaysApply: false
+---
+---
+description: n8n node, Standards for implementing versioning in n8n node development, including light and full versioning approaches. [versioning, compatibility, updates]
+globs: 
+---
+# n8n Node Versioning Standards
+
+1. Light Versioning (All Node Types)
+   ```typescript
+   // Version array in node description
+   export class ExampleNode implements INodeType {
+     description: INodeTypeDescription = {
+       displayName: 'Example Node',
+       name: 'exampleNode',
+       // List available versions
+       version: [1, 2, 3],
+       // ... other properties
+     };
+   }
+
+   // Version-specific properties
+   {
+     displayName: 'New Feature',
+     name: 'newFeature',
+     type: 'string',
+     displayOptions: {
+       show: {
+         '@version': [2, 3],  // Only show in versions 2 and 3
+       }
+     }
+   }
+
+   // Access version in code
+   async execute() {
+     const nodeVersion = this.getNode().typeVersion;
+     if (nodeVersion >= 2) {
+       // Version 2+ specific logic
+     }
+   }
+   ```
+
+2. Full Versioning (Programmatic Style Only)
+   ```typescript
+   // Base node file (ExampleNode.node.ts)
+   export class ExampleNode extends NodeVersionedType {
+     description: INodeTypeDescription = {
+       displayName: 'Example',
+       name: 'example',
+       icon: 'file:example.svg',
+       defaultVersion: 2,
+       versions: [
+         {
+           name: 'v1',
+           path: 'v1',
+         },
+         {
+           name: 'v2',
+           path: 'v2',
+         }
+       ],
+     };
+   }
+
+   // Version-specific implementation (v1/ExampleNode.node.ts)
+   export class ExampleNodeV1 implements INodeType {
+     description: INodeTypeDescription = {
+       displayName: 'Example',
+       version: 1,
+       // Version 1 specific properties
+     };
+   }
+
+   // Version-specific implementation (v2/ExampleNode.node.ts)
+   export class ExampleNodeV2 implements INodeType {
+     description: INodeTypeDescription = {
+       displayName: 'Example',
+       version: 2,
+       // Version 2 specific properties
+     };
+   }
+   ```
+
+3. Version Loading Rules
+   ```typescript
+   // Version selection logic
+   export class ExampleNode implements INodeType {
+     description: INodeTypeDescription = {
+       displayName: 'Example',
+       version: [1, 2],
+       defaults: {
+         version: 2,     // Default to latest for new workflows
+         name: 'Example',
+       },
+       // Existing workflows keep their version
+       properties: [
+         {
+           displayName: 'Legacy Feature',
+           displayOptions: {
+             show: {
+               '@version': [1],  // Only in version 1
+             }
+           }
+         },
+         {
+           displayName: 'New Feature',
+           displayOptions: {
+             show: {
+               '@version': [2],  // Only in version 2
+             }
+           }
+         }
+       ]
+     };
+   }
+   ```
+
+4. Version Selection
+   - Use light versioning for minor changes
+   - Use full versioning for major changes
+   - Default to latest version for new workflows
+   - Maintain backwards compatibility
+   - Document version differences
+
+5. Light Versioning
+   - Keep changes minimal
+   - Use version arrays
+   - Control features with @version
+   - Handle version checks in code
+   - Document version requirements
+
+6. Full Versioning
+   - Separate code by version
+   - Maintain clear version paths
+   - Set appropriate defaults
+   - Document breaking changes
+   - Test all versions
+
+7. Version Management
+   - Plan version upgrades
+   - Document migrations
+   - Test compatibility
+   - Handle edge cases
+   - Support rollbacks
+
+8. Pattern Documentation
+   - Document standard usage
+   - Explain customisations
+   - Provide examples
+   - List limitations
+   - Include edge cases
+
+## Dependencies
+[n8n-build-code_standards.mdc](mdc:.cursor/rules/n8n-build-code_standards.mdc)
+[n8n-build-ui-design_standards.mdc](mdc:.cursor/rules/n8n-build-ui-design_standards.mdc)

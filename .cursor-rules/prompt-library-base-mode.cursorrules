@@ -1,0 +1,44 @@
+Create a cursorrule JSON file that implements a base-level project tracking system with the following requirements:
+
+1. Context Management:
+   - Must track project progress and current context
+   - Should read progress.yaml for work status
+   - Should read context.yaml for current state and focus
+
+2. Operational Guidelines:
+   - Implement phase verification from context.yaml
+   - Check phase calibration points
+   - Ensure progress tracking after changes
+   - Maintain notepad synchronisation
+   - Preserve existing functionality
+   - Enforce type safety
+
+3. Safety Requirements:
+   - Never break type safety
+   - Maintain proper error handling
+   - Document all new code
+   - Update relevant notepads after changes
+   - Preserve existing code style and formatting
+   - Limit change scope to directly modified functions
+   - Ensure changes integrate with existing architecture
+
+4. Project Structure:
+   - Prioritise .project-tracker/notepads/ (weight: 1.0)
+   - Secondary priority on .project-tracker/progress/ (weight: 0.8)
+   - Track context.yaml and progress.yaml
+   - Monitor phases.yaml for progress
+
+5. Mode Configuration:
+   - Set as base development mode
+   - Focus on standard development tasks
+   - Update progress.yaml for task status
+   - Update context.yaml for focus changes
+
+6. Code Analysis Requirements:
+   - Perform basic dependency checks
+   - Verify immediate code impacts
+   - Ensure no breaking changes
+   - Document all modifications
+   - Test changes incrementally
+
+The cursorrule should emphasise simplicity and maintainability while ensuring code quality and project tracking integrity. It should be structured as a JSON file with appropriate nesting and clear rule definitions. 

@@ -1,0 +1,47 @@
+---
+description: REST, Resources, URLs;Learn how to construct and use Autotask REST API resource access endpoints
+globs: 
+alwaysApply: false
+---
+---
+description: REST, Resources, URLs;Learn how to construct and use Autotask REST API resource access endpoints
+globs:
+---
+
+# Resource Access URLs
+
+The Autotask REST API provides standardised resource paths for accessing all entities. These URLs follow a consistent pattern and support various HTTP methods for different operations.
+
+## Base URL Structure
+All resource paths begin with:
+```
+/atservicesrest/v1.0/
+```
+
+## Standard Resource Endpoints
+
+| HTTP Method | Endpoint Pattern | Purpose |
+|------------|-----------------|----------|
+| GET | `/EntityName/entityInformation` | Retrieve entity metadata |
+| GET | `/EntityName/entityInformation/fields` | Get field definitions |
+| GET | `/EntityName/entityInformation/userDefinedFields` | Get custom field definitions |
+| GET | `/EntityName/{id}` | Retrieve specific resource |
+| GET | `/EntityName/query` | Query resources |
+| GET | `/EntityName/query/count` | Get query result count |
+| POST | `/EntityName/query` | Complex resource queries |
+| POST | `/EntityName/query/count` | Complex query counts |
+| PUT | `/EntityName/` | Create/Update resources |
+| PATCH | `/EntityName/` | Partial resource updates |
+| DELETE | `/EntityName/{id}` | Delete specific resource |
+
+## Usage Notes
+
+1. Replace `EntityName` with the actual resource name from the API documentation
+2. All endpoints are case-sensitive
+3. IDs in URLs must be valid resource identifiers
+4. Query endpoints support pagination and filtering
+5. Entity information endpoints provide metadata for integration development
+
+## Related Documentation
+[autotask-endpoints-api_child-collections.mdc](mdc:.cursor/rules/autotask-endpoints-api_child-collections.mdc)
+[autotask-endpoints-api_query-operations.mdc](mdc:.cursor/rules/autotask-endpoints-api_query-operations.mdc)

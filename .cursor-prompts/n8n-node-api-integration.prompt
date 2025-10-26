@@ -1,0 +1,57 @@
+Analyze or create n8n node API integration following these guidelines:
+
+API Integration Requirements:
+1. Authentication:
+   - Handle API credentials
+   - Support multiple auth methods
+   - Implement token refresh
+   - Secure sensitive data
+   - Use n8n credential store
+
+2. Request Handling:
+   - Implement proper HTTP methods
+   - Handle query parameters
+   - Process request bodies
+   - Set appropriate headers
+   - Handle content types
+   - Support file uploads/downloads
+
+3. Response Processing:
+   - Parse response data
+   - Handle pagination
+   - Process binary data
+   - Support streaming
+   - Handle rate limits
+   - Process webhooks
+
+4. Error Management:
+   - Handle HTTP status codes
+   - Implement retry logic
+   - Process API errors
+   - Handle timeouts
+   - Manage rate limiting
+   - Log meaningful errors
+
+5. Data Transformation:
+   - Convert API formats
+   - Handle date/time formats
+   - Process nested structures
+   - Transform arrays/objects
+   - Validate output data
+
+6. Performance & Scaling:
+   - Implement caching
+   - Handle bulk operations
+   - Optimize requests
+   - Manage concurrent calls
+   - Handle large datasets
+
+7. Documentation:
+   - Document endpoints
+   - List required parameters
+   - Provide example responses
+   - Document rate limits
+   - Include error codes
+   - Add usage examples
+
+The API integration should: 

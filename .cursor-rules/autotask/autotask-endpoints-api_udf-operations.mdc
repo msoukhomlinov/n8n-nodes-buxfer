@@ -1,0 +1,107 @@
+---
+description: UDF, customisation, fields; Manage and query User-defined Fields (UDFs) for extending entity data models
+globs: 
+alwaysApply: false
+---
+---
+description: UDF, customisation, fields; Manage and query User-defined Fields (UDFs) for extending entity data models
+---
+
+# User-defined Fields (UDFs)
+
+User-defined Fields allow you to extend Autotask entities with custom fields to store additional data. This guide covers how to work with UDFs through the API.
+
+## Overview
+
+UDFs are entity-specific custom fields that can store various data types:
+- Text (single and multi-line)
+- Numbers
+- Currency
+- Dates
+- Picklists (single and multi-select)
+- Checkboxes
+
+## Accessing UDF Data
+
+### Retrieving UDF Definitions
+
+To get information about available UDFs for an entity:
+
+```http
+GET /ATServicesRest/V1.0/EntityInformation/UDFs/{entityType}
+```
+
+### Reading UDF Values
+
+UDF values are included in entity responses when:
+1. Specifically requested in field selection
+2. Included in the default field set
+
+Example query including UDFs:
+```http
+GET /ATServicesRest/V1.0/Companies/1?UDFFields=true
+```
+
+## Querying UDF Values
+
+UDFs can be used in query filters using the following format:
+`UDF_fieldname`
+
+Example query filtering by UDF:
+```http
+{
+  "filter": [
+    {
+      "field": "UDF_CustomCategory",
+      "op": "eq",
+      "value": "Premium"
+    }
+  ]
+}
+```
+
+### Supported Operations
+
+The following operators are supported for UDF queries:
+- eq (equals)
+- noteq (not equals)
+- gt (greater than)
+- gte (greater than or equal)
+- lt (less than)
+- lte (less than or equal)
+- beginswith
+- contains
+- endswith
+
+## Updating UDF Values
+
+UDF values can be updated using standard entity update operations:
+
+```http
+PATCH /ATServicesRest/V1.0/Companies/1
+Content-Type: application/json
+
+{
+  "UDF_CustomField": "New Value"
+}
+```
+
+## Best Practices
+
+1. **Validation**: Always validate UDF data types before submission
+2. **Performance**: Only request UDF data when needed
+3. **Error Handling**: Handle missing or invalid UDF scenarios
+4. **Caching**: Cache UDF definitions to reduce API calls
+
+## Error Handling
+
+Common UDF-related errors:
+- 400: Invalid UDF value type
+- 404: UDF not found
+- 403: Insufficient permissions
+
+## Security Considerations
+
+- UDF access follows entity-level permissions
+- Sensitive data should use appropriate field types
+- Validate and sanitise all UDF inputs

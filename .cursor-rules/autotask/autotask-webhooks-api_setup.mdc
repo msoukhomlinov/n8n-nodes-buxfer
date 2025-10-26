@@ -1,0 +1,181 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+---
+description: configuration;setup;endpoint;Detailed guide for setting up and configuring Autotask webhook endpoints securely
+globs: 
+alwaysApply: false
+---
+---
+description: configuration;setup;endpoint;Detailed guide for setting up and configuring Autotask webhook endpoints securely
+---
+
+# Webhook Setup Guide
+
+This guide provides step-by-step instructions for implementing Autotask webhooks in your integration.
+
+## Prerequisites
+
+1. **API Access:**
+   - Valid Autotask API credentials
+   - API Security Level with webhook permissions
+   - API integration enabled for your account
+   - Appropriate resource permissions for target entities
+
+2. **Technical Requirements:**
+   - HTTPS-enabled endpoint
+   - Valid SSL certificate
+   - Port 443 accessibility
+   - Ability to process JSON payloads
+   - Reliable network connectivity
+
+## Webhook Configuration Steps
+
+### 1. Endpoint Preparation
+
+```powershell
+# Example endpoint structure in ASP.NET Core
+[HttpPost("webhook/autotask")]
+public async Task<IActionResult> HandleWebhook(
+    [FromBody] AutotaskWebhookPayload payload)
+{
+    try {
+        // Validate webhook signature
+        if (!ValidateSignature(Request.Headers["X-Autotask-Signature"], payload))
+            return Unauthorized();
+
+        // Process webhook payload
+        await _webhookService.ProcessPayload(payload);
+
+        // Must return 200 OK for successful processing
+        return Ok();
+    }
+    catch (Exception ex) {
+        _logger.LogError(ex, "Webhook processing failed");
+        // Non-200 response will trigger retry mechanism
+        return StatusCode(500);
+    }
+}
+```
+
+### 2. Webhook Registration
+
+To register a webhook via the Autotask interface:
+
+1. Navigate to Admin > Features & Settings > Integration
+2. Select "Webhooks" from the menu
+3. Click "New Webhook"
+4. Configure the following required settings:
+   - **Name:** Descriptive identifier for the webhook
+   - **Endpoint URL:** Your HTTPS endpoint (must be publicly accessible)
+   - **Entity Type:** Select target entity (e.g., Ticket, Company)
+   - **Event Types:** Choose trigger events (Create, Update, Delete)
+   - **Active:** Enable/disable webhook
+   - **Retry Settings:** Configure retry attempts and intervals
+   - **Field Filters:** Optionally specify fields to monitor
+
+### 3. Security Configuration
+
+```json
+{
+  "webhook": {
+    "authentication": {
+      "type": "Bearer",
+      "token": "YOUR_SECRET_TOKEN"
+    },
+    "headers": {
+      "X-Autotask-Signature": "HASH_SIGNATURE",
+      "Content-Type": "application/json",
+      "X-Autotask-WebhookId": "WEBHOOK_IDENTIFIER"
+    }
+  }
+}
+```
+
+### 4. Payload Validation
+
+```powershell
+# Example validation function
+function Validate-WebhookSignature {
+    param(
+        [string]$signature,
+        [string]$payload,
+        [string]$secret
+    )
+
+    $hmacsha = New-Object System.Security.Cryptography.HMACSHA256
+    $hmacsha.key = [Text.Encoding]::ASCII.GetBytes($secret)
+    $payloadBytes = [Text.Encoding]::ASCII.GetBytes($payload)
+    $hash = $hmacsha.ComputeHash($payloadBytes)
+
+    return $signature -eq [Convert]::ToBase64String($hash)
+}
+```
+
+## Testing and Verification
+
+1. **Initial Testing:**
+   - Create test entity records
+   - Verify webhook triggers
+   - Check payload format
+   - Validate signature
+   - Test field-level filtering
+
+2. **Error Handling:**
+   - Implement retry logic
+   - Log failed deliveries
+   - Monitor webhook status
+   - Handle deactivation notifications
+
+3. **Performance Testing:**
+   - Test concurrent webhooks
+   - Verify payload processing
+   - Check response times
+   - Monitor resource usage
+
+## Monitoring and Maintenance
+
+1. **Health Checks:**
+   - Monitor webhook status
+   - Check delivery success rates
+   - Review error logs
+   - Track retry attempts
+
+2. **Performance Metrics:**
+   - Track response times
+   - Monitor payload sizes
+   - Analyse trigger frequency
+   - Measure processing latency
+
+3. **Maintenance Tasks:**
+   - Rotate security tokens
+   - Update SSL certificates
+   - Review webhook configurations
+   - Clean up inactive webhooks
+
+## Troubleshooting
+
+Common issues and solutions:
+
+1. **Failed Deliveries:**
+   - Check endpoint availability
+   - Verify SSL certificate
+   - Validate authentication
+   - Review firewall settings
+
+2. **Invalid Signatures:**
+   - Confirm secret key
+   - Check payload formatting
+   - Verify hash algorithm
+   - Validate header presence
+
+3. **Performance Issues:**
+   - Optimise payload processing
+   - Implement async handling
+   - Scale infrastructure
+   - Monitor thread usage
+
+For implementation examples, see [autotask-webhooks-api_examples.mdc](mdc:.cursor/rules/autotask-webhooks-api_examples.mdc)
+For error handling details, see [autotask-webhooks-api_errors.mdc](mdc:.cursor/rules/autotask-webhooks-api_errors.mdc)

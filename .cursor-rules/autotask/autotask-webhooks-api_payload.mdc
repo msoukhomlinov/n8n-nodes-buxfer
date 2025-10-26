@@ -1,0 +1,169 @@
+---
+description: payload;structure;format;Comprehensive guide for understanding and processing Autotask webhook payload structures
+globs: 
+alwaysApply: false
+---
+---
+description: payload;structure;format;Comprehensive guide for understanding and processing Autotask webhook payload structures
+---
+
+# Webhook Payload Structure
+
+This document details the structure and format of Autotask webhook payloads.
+
+## Payload Format
+
+All webhook payloads are sent as JSON objects with the following structure:
+
+```json
+{
+    "EventType": "string",
+    "EntityType": "string",
+    "Entity": {
+        "id": "integer",
+        ...entity-specific fields...
+    },
+    "WebhookId": "string",
+    "Timestamp": "datetime",
+    "ResourceId": "integer"
+}
+```
+
+### Core Fields
+
+1. **EventType** (Required)
+   - Type: String
+   - Values: "Create", "Update", "Delete"
+   - Indicates the type of event that triggered the webhook
+
+2. **EntityType** (Required)
+   - Type: String
+   - Values: "Ticket", "Company", "Contact", "Asset"
+   - Specifies the type of entity that changed
+
+3. **Entity** (Required)
+   - Type: Object
+   - Contains the entity data including all available fields
+   - For "Delete" events, only contains the ID
+
+4. **WebhookId** (Required)
+   - Type: String
+   - Unique identifier for the webhook configuration
+   - Used for tracking and troubleshooting
+
+5. **Timestamp** (Required)
+   - Type: DateTime (ISO 8601)
+   - When the event occurred
+   - Example: "2024-01-29T12:00:00Z"
+
+6. **ResourceId** (Required)
+   - Type: Integer
+   - Internal identifier for the resource owner
+   - Used for security context validation
+
+## Entity-Specific Structures
+
+### Ticket Payload
+
+```json
+{
+    "EventType": "Create",
+    "EntityType": "Ticket",
+    "Entity": {
+        "id": 12345,
+        "ticketNumber": "T20240129.0001",
+        "title": "Example Ticket",
+        "description": "Ticket description",
+        "status": 1,
+        "priority": 2,
+        "queueId": 123,
+        "assignedResourceId": 456,
+        "createDate": "2024-01-29T12:00:00Z",
+        "lastModifiedDate": "2024-01-29T12:00:00Z"
+    },
+    "WebhookId": "whk_abc123",
+    "Timestamp": "2024-01-29T12:00:00Z",
+    "ResourceId": 789
+}
+```
+
+### Company Payload
+
+```json
+{
+    "EventType": "Update",
+    "EntityType": "Company",
+    "Entity": {
+        "id": 67890,
+        "companyName": "Example Company",
+        "companyNumber": "COMP001",
+        "phone": "+61 2 1234 5678",
+        "address1": "123 Example Street",
+        "city": "Sydney",
+        "state": "NSW",
+        "postalCode": "2000",
+        "country": "Australia",
+        "active": true
+    },
+    "WebhookId": "whk_def456",
+    "Timestamp": "2024-01-29T12:00:00Z",
+    "ResourceId": 789
+}
+```
+
+## Field Value Types
+
+- **Strings:** Text fields, limited to 8000 characters
+- **Integers:** Whole numbers
+- **Decimals:** Floating-point numbers with 2 decimal places
+- **Booleans:** true/false values
+- **DateTimes:** ISO 8601 format with timezone
+- **Arrays:** Lists of values or objects
+- **Objects:** Nested data structures
+
+## Payload Size Limits
+
+- Maximum payload size: 16MB
+- Recommended size: <1MB for optimal performance
+- Large payloads may be truncated
+- Binary data should be sent as base64 encoded strings
+
+## Handling Special Cases
+
+### Delete Events
+
+```json
+{
+    "EventType": "Delete",
+    "EntityType": "Contact",
+    "Entity": {
+        "id": 13579
+    },
+    "WebhookId": "whk_ghi789",
+    "Timestamp": "2024-01-29T12:00:00Z",
+    "ResourceId": 789
+}
+```
+
+### Field Updates
+
+For update events, only changed fields are included in the payload to minimise data transfer.
+
+### Error Responses
+
+If your endpoint returns an error:
+
+```json
+{
+    "error": {
+        "code": "string",
+        "message": "string",
+        "details": {
+            "field": "description of issue"
+        }
+    }
+}
+```
+
+For implementation examples, see [autotask-webhooks-api_examples.mdc](mdc:.cursor/rules/autotask-webhooks-api_examples.mdc)
+For error handling details, see [autotask-webhooks-api_errors.mdc](mdc:.cursor/rules/autotask-webhooks-api_errors.mdc)

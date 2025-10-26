@@ -1,0 +1,40 @@
+Create a new n8n resource following these guidelines:
+
+Resource Structure:
+- Create types in `resources/{resource}/resource.types.ts`
+- Create handler in `resources/{resource}/resource.handler.ts`
+- Create description in `descriptions/resource.description.ts`
+- Export from respective index files
+- Follow TypeScript best practices
+- Include comprehensive JSDoc comments
+
+Implementation Requirements:
+- Include proper error handling with specific error messages
+- Add input validation for all parameters
+- Follow n8n naming conventions (camelCase for variables, PascalCase for types)
+- Include rate limiting considerations
+- Add proper logging
+- Include retry logic for failed requests
+- Add comprehensive field descriptions
+- Consider pagination for list operations
+- Include proper type definitions
+- Add proper authentication handling
+
+The resource should support these operations:
+- GET (single item)
+- GET (list/search with filters)
+- POST (create)
+- PUT (update)
+- DELETE (remove)
+
+Additional Considerations:
+- Add proper response type definitions
+- Include proper error response handling
+- Consider bulk operations if applicable
+- Add proper parameter validation
+- Include proper HTTP status code handling
+- Consider versioning if applicable
+- Add proper documentation
+- Include examples in descriptions
+
+The resource name and details are: 

@@ -1,0 +1,49 @@
+---
+description: terminology;mapping;integration;Guide for mapping Autotask REST API entity names to their UI counterparts for accurate integration
+globs: 
+alwaysApply: false
+---
+---
+description: terminology;mapping;integration;Guide for mapping Autotask REST API entity names to their UI counterparts for accurate integration
+globs:
+---
+
+# Autotask REST API Terminology Mapping
+
+This guide provides essential mappings between Autotask REST API entity names and their corresponding User Interface (UI) terms to ensure accurate integration development.
+
+## Core Entity Mappings
+
+| REST API Term | UI Term | Context |
+|--------------|---------|----------|
+| Company | Organization/Client | Default UI term is "Organization". In Client Portal appears as "Client". May also show as "Company", "Business Unit", or "Site" |
+| BillingCode | Billing Code | Used for categorising labor and items for billing/reporting. Includes Work Types, Internal Time Codes, Material Codes, Service Codes |
+| BillToAddress | Billing Address | Represents the company's billing location |
+| ContractBlockHourFactor | Block Hour Multiplier | Determines block hours consumption rate for labor |
+| Cost | Charge | Used for billable/non-billable monetary amounts. "Cost" only appears for Unit Cost or vendor charges |
+| OrganizationalLevel1 | Division | May appear as "Branch", "Business Unit", "Sector", or "Segment" |
+| OrganizationalLevel2 | Line of Business | Can show as "Application", "Function", "Product Line", "Service Line" |
+| ConfigurationItem | Device | May appear as "Asset", "Configuration Item", or "Installed Product" |
+| LeadSource | Lead Source | Used for lead tracking and referral sources |
+
+## Location and Address Terms
+
+| REST API Term | UI Term | Notes |
+|--------------|---------|--------|
+| Location | Location/Branch/Site | Default is "Location" but may vary by organisation |
+| State | State/Province/County | Varies by region and local terminology |
+| PostalCode | Zip Code/Post Code | Regional variations include "City Code" or "Postal Code" |
+
+## Important Implementation Notes
+
+1. UI terminology can be customised through Admin > Features & Settings > Your Organization
+2. Integration should handle multiple possible UI terms mapping to single API entities
+3. All monetary values and charges use the "Cost" field in API but appear as "Charge" in UI
+4. Regional variations should be considered for address and location fields
+
+## Best Practices
+
+- Always reference entities using API terms in integration code
+- Include UI term mappings in error messages and logs for better troubleshooting
+- Consider implementing a terminology mapping layer for user-facing components
+- Document any custom terminology configurations specific to the implementation

@@ -1,0 +1,134 @@
+# SETUP PROJECT MAINTENANCE RULES
+# Purpose: Create or update .cursorrules for project tracking maintenance
+# Usage: Run this prompt after setup-project-tracking-structure to configure maintenance rules
+
+You will create or update the .cursorrules file to enforce project tracking maintenance. Follow these steps:
+
+1. Check if .cursorrules exists
+2. If it exists, preserve any existing rules not related to project tracking
+3. Add or update the following rules:
+
+```yaml
+# Project Tracking Maintenance Rules
+rules:
+  - name: "Project Tracking Check"
+    on: "conversation_start"
+    do: "read_project_status"
+    files: 
+      - ".project-tracker/notepads/goals.yaml"
+      - ".project-tracker/notepads/context.yaml"
+      - ".project-tracker/notepads/progress.yaml"
+      - ".project-tracker/notepads/knowledge.yaml"
+    message: "Reading project status and notepads..."
+
+  - name: "Progress Update Required"
+    on: "code_change"
+    do: "update_tracking"
+    files:
+      - ".project-tracker/progress/phases.yaml"
+      - ".project-tracker/notepads/progress.yaml"
+      - ".project-tracker/notepads/context.yaml"
+    message: "Code changed. Update progress tracking."
+
+  - name: "Notepad Sync Required"
+    on: "phase_change"
+    do: "sync_notepads"
+    files:
+      - ".project-tracker/notepads/context.yaml"
+      - ".project-tracker/notepads/progress.yaml"
+      - ".project-tracker/notepads/goals.yaml"
+    message: "Phase changed. Sync context and progress notepads."
+
+  - name: "Knowledge Update Required"
+    on: "technical_decision"
+    do: "update_knowledge"
+    files:
+      - ".project-tracker/notepads/knowledge.yaml"
+      - ".project-tracker/records/decisions/"
+      - ".project-tracker/notepads/context.yaml"
+    message: "Technical decision made. Update knowledge base."
+
+  - name: "Goals Alignment Check"
+    on: "milestone_complete"
+    do: "verify_goals"
+    files:
+      - ".project-tracker/notepads/goals.yaml"
+      - ".project-tracker/notepads/progress.yaml"
+      - ".project-tracker/progress/phases.yaml"
+    message: "Milestone reached. Verify alignment with goals."
+
+  - name: "Changelog Update Required"
+    on: "code_change"
+    do: "update_changelog"
+    files:
+      - "CHANGELOG.md"
+      - ".project-tracker/notepads/progress.yaml"
+    message: "Code changed. Update changelog and progress."
+
+  - name: "Structure Verification"
+    on: "file_change"
+    in: ".project-tracker/"
+    do: "verify_structure"
+    message: "Verifying project structure..."
+
+  - name: "Quality Gate Check"
+    on: "status_change"
+    to: "completed"
+    do: "verify_calibration"
+    message: "Running quality checks..."
+```
+
+Each rule enforces these requirements:
+
+1. Project Tracking Check:
+   - Read and report project status at start of each conversation
+   - Verify current phase and progress
+   - Load relevant notepad context
+
+2. Progress Update Required:
+   - Track all code changes in progress file
+   - Update task/phase status
+   - Sync progress notepad
+
+3. Notepad Sync Required:
+   - Keep context notepad current
+   - Update progress tracking
+   - Maintain phase alignment
+
+4. Knowledge Update Required:
+   - Document technical decisions
+   - Update best practices
+   - Record lessons learned
+
+5. Goals Alignment Check:
+   - Verify progress against goals
+   - Update milestone tracking
+   - Maintain project focus
+
+6. Changelog Update Required:
+   - Maintain [Unreleased] section
+   - Document all code changes
+   - Update progress tracking
+
+7. Structure Verification:
+   - Maintain .project-tracker structure
+   - Verify file integrity
+   - Preserve tracking hierarchy
+
+8. Quality Gate Check:
+   - Verify completion criteria
+   - Run calibration checks
+   - Update success metrics
+
+After creating/updating .cursorrules:
+1. Verify the file syntax is correct
+2. Ensure all paths match the project structure
+3. Test each rule trigger
+4. Report the update status
+
+This will ensure:
+- Consistent project tracking
+- Automated maintenance checks
+- Quality control enforcement
+- Documentation compliance
+- Notepad synchronisation 

@@ -1,0 +1,91 @@
+Analyze or create n8n Code node implementation following these guidelines:
+
+Code Node Capabilities:
+1. Data Access:
+   - $input.all() - Get all input items
+   - $input.first()/last() - Get first/last item
+   - $input.item - Current item in per-item mode
+   - $("NodeName").all() - Get data from other nodes
+
+2. Built-in Variables:
+   - $workflow - Workflow metadata
+   - $execution - Execution details
+   - $vars - Global variables (read-only)
+   - $json - Current item data
+   - $binary - Binary data
+
+3. Helper Functions:
+   - $evaluateExpression() - Run inline expressions
+   - $ifEmpty() - Provide fallback values
+   - $jmespath() - Query JSON data
+
+4. Error Handling:
+   - Use try/catch blocks
+   - Log errors with console.log()
+   - Handle missing data gracefully
+   - Validate input data
+
+5. Performance Considerations:
+   - Optimize loops
+   - Minimize API calls
+   - Handle large datasets efficiently
+   - Consider memory usage
+
+6. Best Practices:
+   - Use TypeScript types where possible
+   - Add comprehensive comments
+   - Follow n8n naming conventions
+   - Structure code modularly
+   - Handle all edge cases
+   - Include proper validation
+   - Add error logging
+   - Consider rate limiting
+
+7. Return Format:
+   - Return array of items
+   - Each item should have json/binary properties
+   - Maintain consistent data structure
+
+8. External Modules (Self-hosted Only):
+   - Install via npm/yarn
+   - Require modules in code
+   - Handle module dependencies
+   - Consider version compatibility
+   - Document required modules
+
+9. Python Support:
+   - Switch language to Python
+   - Use Python standard library
+   - Handle Python dependencies
+   - Consider version compatibility
+   - Note JavaScript feature limitations
+
+10. Debugging Techniques:
+    - Use console.log() strategically
+    - Add debug checkpoints
+    - Monitor variable states
+    - Track execution flow
+    - Log input/output data
+    - Use try/catch for sections
+    - Add performance metrics
+    - Monitor memory usage
+
+Example Patterns:
+1. External Module Usage:
+   ```javascript
+   const _ = require('lodash');
+   const axios = require('axios');
+   ```
+
+2. Python Implementation:
+   ```python
+   import json
+   import requests
+   ```
+
+3. Debug Logging:
+   ```javascript
+   console.log('Processing item:', { id: item.json.id, data: item.json });
+   ```
+
+The Code node implementation should: 

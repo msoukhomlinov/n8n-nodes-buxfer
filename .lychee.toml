@@ -1,0 +1,18 @@
+# Accept common transient statuses
+accept = [200, 203, 206, 301, 302, 307, 308, 401, 403, 405, 406, 410, 418, 429]
+retry_wait_time = 2
+max_retries = 3
+timeout = 20
+max_redirects = 5
+
+# Exclusions
+exclude = [
+  "^mailto:",
+  "^tel:",
+  "localhost",
+  "127.0.0.1"
+]
+
+# Inputs
+include_verbatim = true
+

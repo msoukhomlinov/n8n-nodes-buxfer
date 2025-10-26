@@ -1,0 +1,172 @@
+Analyze and understand n8n Code Node limitations following these guidelines:
+
+1. Environment Limitations:
+   - Sandboxed execution environment
+   - Limited access to Node.js globals
+   - Restricted file system access
+   - No direct process manipulation
+   - Limited environment variables access
+
+2. Module Restrictions:
+   Cloud Version:
+   - No external module imports
+   - Limited to built-in modules
+   - No npm package support
+   - No custom module loading
+   - No dynamic requires
+
+   Self-Hosted Version:
+   - External modules allowed
+   - Must be pre-installed
+   - Version compatibility issues
+   - Security considerations
+   - Performance impact
+
+3. Memory Constraints:
+   - Limited heap memory
+   - No persistent storage
+   - Memory leaks impact
+   - Large dataset limitations
+   - Buffer size restrictions
+
+4. Performance Limitations:
+   - Execution timeout limits
+   - CPU usage restrictions
+   - Network call limitations
+   - Concurrent operation limits
+   - Resource throttling
+
+5. Security Restrictions:
+   - No shell command execution
+   - Limited network access
+   - No direct file writes
+   - Restricted environment access
+   - API rate limiting
+
+6. State Management:
+   - No persistent state
+   - Session limitations
+   - Context restrictions
+   - No shared memory
+   - Workflow isolation
+
+7. Common Workarounds:
+   Memory Management:
+   ```javascript
+   // Process large datasets in chunks
+   const batchSize = 1000;
+   const results = [];
+   
+   for (let i = 0; i < items.length; i += batchSize) {
+     const batch = items.slice(i, i + batchSize);
+     results.push(...processBatch(batch));
+   }
+   ```
+
+   Module Access (Self-hosted):
+   ```javascript
+   // Check module availability
+   let lodash;
+   try {
+     lodash = require('lodash');
+   } catch (error) {
+     console.log('Lodash not available, using fallback');
+     lodash = {
+       chunk: (arr, size) => {
+         const chunks = [];
+         for (let i = 0; i < arr.length; i += size) {
+           chunks.push(arr.slice(i, i + size));
+         }
+         return chunks;
+       }
+     };
+   }
+   ```
+
+   State Persistence:
+   ```javascript
+   // Use workflow data for pseudo-persistence
+   const getState = () => {
+     try {
+       return JSON.parse($execution.getWorkflowStaticData('global'));
+     } catch {
+       return {};
+     }
+   };
+
+   const setState = (data) => {
+     $execution.setWorkflowStaticData('global', JSON.stringify(data));
+   };
+   ```
+
+8. Best Practices for Handling Limitations:
+   - Monitor resource usage
+   - Implement timeout handling
+   - Use efficient algorithms
+   - Cache results where possible
+   - Handle errors gracefully
+   Example:
+   ```javascript
+   // Implement timeout handling
+   const withTimeout = (promise, ms) => {
+     const timeout = new Promise((_, reject) => {
+       setTimeout(() => reject(new Error('Operation timed out')), ms);
+     });
+     return Promise.race([promise, timeout]);
+   };
+
+   try {
+     const result = await withTimeout(longOperation(), 5000);
+     return result;
+   } catch (error) {
+     if (error.message === 'Operation timed out') {
+       return fallbackOperation();
+     }
+     throw error;
+   }
+   ```
+
+9. Cloud vs Self-Hosted Differences:
+   Cloud:
+   - Stricter limitations
+   - No external modules
+   - More resource constraints
+   - Higher security restrictions
+   - Standard timeout limits
+
+   Self-Hosted:
+   - Configurable limits
+   - External module support
+   - Custom resource allocation
+   - Flexible security settings
+   - Adjustable timeouts
+
+10. Documentation and Error Handling:
+    ```javascript
+    /**
+     * Process data with limitation awareness
+     * @param {Array} items - Items to process
+     * @throws {Error} If memory limit exceeded
+     * @throws {Error} If execution timeout reached
+     */
+    async function processWithLimits(items) {
+      // Check data size
+      if (JSON.stringify(items).length > MAX_SIZE) {
+        throw new Error('Data size exceeds limits');
+      }
+
+      // Process with timeout
+      return withTimeout(async () => {
+        const chunks = chunkArray(items, 1000);
+        const results = [];
+        
+        for (const chunk of chunks) {
+          results.push(...await processChunk(chunk));
+        }
+        
+        return results;
+      }, TIMEOUT_MS);
+    }
+    ```
+
+The Code Node implementation should consider these limitations and: 

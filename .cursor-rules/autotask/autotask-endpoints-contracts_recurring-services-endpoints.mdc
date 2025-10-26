@@ -1,0 +1,149 @@
+---
+description: endpoints,contracts,implementation;Technical guide for implementing recurring service contract endpoints in n8n integration
+globs: 
+alwaysApply: false
+---
+---
+description: endpoints,contracts,implementation;Technical guide for implementing recurring service contract endpoints in n8n integration
+globs:
+---
+
+# Recurring Service Contract API Endpoints
+
+## Authentication Requirements
+
+- API user requires appropriate security level access
+- OAuth2 authentication required for all endpoints
+- Include API integration code in headers
+
+## Base Endpoints
+
+### ContractService Endpoints
+
+```
+GET    /v1.0/ContractServices
+POST   /v1.0/ContractServices
+GET    /v1.0/ContractServices/{id}
+PATCH  /v1.0/ContractServices/{id}
+DELETE /v1.0/ContractServices/{id}
+```
+
+### ContractServiceAdjustment Endpoints
+
+```
+GET    /v1.0/ContractServiceAdjustments
+POST   /v1.0/ContractServiceAdjustments
+GET    /v1.0/ContractServiceAdjustments/{id}
+PATCH  /v1.0/ContractServiceAdjustments/{id}
+DELETE /v1.0/ContractServiceAdjustments/{id}
+```
+
+### ContractServiceUnit Endpoints
+
+```
+GET    /v1.0/ContractServiceUnits
+GET    /v1.0/ContractServiceUnits/{id}
+```
+
+## Request/Response Examples
+
+### Create ContractService
+
+```json
+POST /v1.0/ContractServices
+{
+  "ContractID": 12345,
+  "ServiceID": 67890,
+  "UnitPrice": 20.00,
+  "AdjustedPrice": true
+}
+```
+
+### Add Service Adjustment
+
+```json
+POST /v1.0/ContractServiceAdjustments
+{
+  "ContractServiceID": 12345,
+  "EffectiveDate": "2024-03-10",
+  "UnitChange": 2
+}
+```
+
+## Error Handling
+
+Common HTTP Status Codes:
+- 400: Invalid request format
+- 401: Authentication failed
+- 403: Insufficient permissions
+- 404: Resource not found
+- 409: Conflict with existing data
+- 429: Rate limit exceeded
+
+## Implementation Guidelines
+
+1. Rate Limiting:
+   - Maximum 5 concurrent description: autotask rest api,
+   - Implement exponential backoff
+   - Handle 429 responses appropriately
+
+2. Data Validation:
+   - Validate date formats (ISO 8601)
+   - Check numeric fields for valid ranges
+   - Ensure required fields are present
+
+3. Error Recovery:
+   - Implement idempotency checks
+   - Store transaction IDs
+   - Log failed description: autotask rest api, for debugging
+
+4. Testing Considerations:
+   - Use sandbox environment first
+   - Test period boundary scenarios
+   - Verify adjustment calculations
+
+## n8n Node Implementation
+
+Key components for node creation:
+
+1. Authentication:
+```typescript
+export class AutotaskApi implements INodeType {
+  authenticate() {
+    // OAuth2 implementation
+    // Include API integration code
+  }
+}
+```
+
+2. Resource Operations:
+```typescript
+export class AutotaskApi implements INodeType {
+  async execute() {
+    // Handle different operations
+    const operation = this.getNodeParameter('operation');
+    const resource = this.getNodeParameter('resource');
+
+    switch(resource) {
+      case 'contractService':
+        // Handle ContractService operations
+        break;
+      case 'serviceAdjustment':
+        // Handle ContractServiceAdjustment operations
+        break;
+    }
+  }
+}
+```
+
+3. Error Handling:
+```typescript
+try {
+  // API call
+} catch (error) {
+  if (error.response?.status === 429) {
+    // Implement retry logic
+  }
+  throw new NodeApiError(this.getNode(), error);
+}
+```
