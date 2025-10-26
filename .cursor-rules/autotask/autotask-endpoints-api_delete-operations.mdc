@@ -1,0 +1,89 @@
+---
+description: delete,resource,removal;Learn how to remove resources using Autotask API DELETE operations effectively
+globs: 
+alwaysApply: false
+---
+---
+description: delete,resource,removal;Learn how to remove resources using Autotask API DELETE operations effectively
+globs:
+---
+
+# DELETE Operations
+
+## Overview
+The DELETE operation allows you to remove specific resources from the Autotask system. This operation is available for supported entity types that permit deletion.
+
+## Endpoint Format
+```
+DELETE /atservicesrest/V1.0/{entityType}/{id}
+```
+
+## Prerequisites
+- Valid API credentials
+- Appropriate user permissions for deletion
+- Resource ID of the entity to delete
+
+## Request Headers
+| Header | Value | Required |
+|--------|--------|-----------|
+| ApiIntegrationcode | Your integration code | Yes |
+| UserName | Your API username | Yes |
+| Secret | Your API secret | Yes |
+| Content-Type | application/json | Yes |
+
+## Response Codes
+| Status Code | Description |
+|------------|-------------|
+| 204 | Success - Resource deleted successfully |
+| 400 | Bad Request - Invalid ID or entity type |
+| 401 | Unauthorized - Authentication failed |
+| 403 | Forbidden - Insufficient permissions |
+| 404 | Not Found - Resource doesn't exist |
+| 429 | Too Many description: autotask rest api, - Rate limit exceeded |
+
+## Usage Guidelines
+1. Always verify the resource exists before attempting deletion
+2. Ensure proper error handling for failed deletions
+3. Consider implementing soft deletes where appropriate
+4. Check for dependent resources before deletion
+5. Maintain audit logs of deletion operations
+
+## Example Request
+```powershell
+$headers = @{
+    'ApiIntegrationcode' = 'YOUR_INTEGRATION_CODE'
+    'UserName' = 'YOUR_USERNAME'
+    'Secret' = 'YOUR_SECRET'
+    'Content-Type' = 'application/json'
+}
+
+$response = Invoke-RestMethod `
+    -Uri 'https://ww6.autotask.net/atservicesrest/V1.0/Tickets/12345' `
+    -Method 'DELETE' `
+    -Headers $headers
+```
+
+## Error Handling
+```json
+{
+    "errors": [
+        {
+            "code": "InvalidResource",
+            "message": "The requested resource could not be found",
+            "resourceId": "12345"
+        }
+    ]
+}
+```
+
+## Best Practices
+1. Implement confirmation mechanisms for destructive operations
+2. Use transaction management for complex deletions
+3. Validate dependencies before deletion
+4. Maintain proper logging and auditing
+5. Handle rate limiting appropriately
+
+## Related Documentation
+- See authentication guide for detailed credential setup
+- Refer to entity documentation for deletable resource types
+- Check rate limiting documentation for throttling details

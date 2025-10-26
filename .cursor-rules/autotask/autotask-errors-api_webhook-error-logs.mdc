@@ -1,0 +1,50 @@
+---
+description: webhooks;errors;logs;Comprehensive guide for querying and managing webhook delivery error logs in Autotask API
+globs: 
+alwaysApply: false
+---
+---
+description: webhooks;errors;logs;Comprehensive guide for querying and managing webhook delivery error logs in Autotask API
+---
+
+# Webhook Error Logs
+
+The Autotask API maintains an error log system that tracks webhook delivery failures. These logs are retained for 30 days and contain detailed information about failed webhook deliveries after the maximum retry attempts have been exhausted.
+
+## Entity Overview
+
+| Property       | Value                |
+|---------------|---------------------|
+| Entity Name   | WebhookEventErrorLog |
+| Query Support | Yes                 |
+| Delete Support| Yes                 |
+
+## Field Definitions
+
+| Field Name      | Data Type    | Read Only | Required | Description                                                    |
+|----------------|--------------|-----------|-----------|----------------------------------------------------------------|
+| id             | long         | Yes       | Yes       | Unique identifier for the webhook error event                   |
+| CreateDateTime | datetime     | Yes       | No        | Timestamp when the error occurred                              |
+| ErrorMessage   | string(8000) | Yes       | No        | Response message from the failed webhook callout               |
+| Payload        | string(8000) | Yes       | No        | Complete HTTP POST payload including system fields and UDFs     |
+| SequenceNumber | integer      | Yes       | No        | Incremental counter for tracking delivery order                |
+
+## Important Notes
+
+1. Error logs are only accessible for callouts created by the querying integration
+2. Errors should be deleted after being addressed to maintain a clean log
+3. Standard 500 record limit applies to queries
+4. Full payload content is available in the response
+
+## Best Practices
+
+1. Regularly query error logs to identify delivery issues
+2. Process and delete resolved errors promptly
+3. Use sequence numbers to detect out-of-order deliveries
+4. Monitor error messages for recurring issues
+
+## Error Log Retention
+
+- Errors are automatically retained for 30 days from creation
+- After 30 days, records are automatically purged
+- Manual deletion is recommended after processing

@@ -1,0 +1,132 @@
+---
+description: n8n node, Standards for implementing help text and user guidance in n8n node development. [help text, guidance, hints, tooltips]
+globs: 
+alwaysApply: false
+---
+---
+description: n8n node, Standards for implementing help text and user guidance in n8n node development. [help text, guidance, hints, tooltips]
+globs: 
+---
+# n8n Node Help Text Standards
+
+1. Info Boxes
+   ```typescript
+   // Essential information in yellow box
+   {
+     displayName: 'Notice',
+     name: 'notice',
+     type: 'notice',
+     default: 'API rate limits apply: 100 requests per minute',
+   },
+
+   // Warning information
+   {
+     displayName: 'Warning',
+     name: 'warning',
+     type: 'notice',
+     default: 'This operation cannot be undone',
+     options: {
+       variant: 'warning'
+     }
+   }
+   ```
+
+2. Parameter Hints
+   ```typescript
+   // Contextual information below field
+   {
+     displayName: 'Workspace ID',
+     name: 'workspaceId',
+     type: 'string',
+     hint: 'Find this in your workspace settings',
+   },
+
+   // Hints with links
+   {
+     displayName: 'API Key',
+     name: 'apiKey',
+     type: 'string',
+     hint: 'Get your API key from <a href="https://example.com/settings">account settings</a>',
+   }
+   ```
+
+3. Node Hints
+   ```typescript
+   // Node level hints
+   description: INodeTypeDescription = {
+     displayName: 'My Node',
+     name: 'myNode',
+     hints: [
+       {
+         message: "Consider enabling <b>Execute Once</b> for better performance",
+         type: 'info',
+         location: 'outputPane',
+         whenToDisplay: 'beforeExecution',
+         displayCondition: '={{ $input.all().length > 1 }}'
+       }
+     ]
+   };
+   ```
+
+4. Tooltips
+   ```typescript
+   // Field with tooltip
+   {
+     displayName: 'Update Method',
+     name: 'updateMethod',
+     type: 'options',
+     description: 'Choose how to update existing records',
+     options: [
+       {
+         name: 'Merge',
+         value: 'merge',
+         description: 'Only update specified fields',
+       }
+     ],
+   }
+   ```
+
+5. Placeholder Text
+   ```typescript
+   // Input guidance
+   {
+     displayName: 'Email',
+     name: 'email',
+     type: 'string',
+     placeholder: 'name@example.com',
+   },
+
+   // JSON example
+   {
+     displayName: 'Data',
+     name: 'data',
+     type: 'json',
+     placeholder: '{\n  "name": "John",\n  "email": "john@example.com"\n}',
+   }
+   ```
+
+6. Help Text Usage
+   - Use info boxes sparingly for impact
+   - Provide contextual parameter hints
+   - Add tooltips only when helpful
+   - Include clear placeholder text
+   - Link to documentation when needed
+
+7. Help Text Writing
+   - Keep text concise and clear
+   - Use consistent terminology
+   - Provide examples where helpful
+   - Link to additional resources
+   - Update help text regularly
+
+8. Dynamic Guidance
+   - Adapt help based on context
+   - Show relevant information
+   - Hide irrelevant details
+   - Provide progressive assistance
+   - Handle all states properly
+
+## Dependencies
+[n8n-build-ui-design_standards.mdc](mdc:.cursor/rules/n8n-build-ui-design_standards.mdc)
+[n8n_general-naming_conventions.mdc](mdc:.cursor/rules/n8n_general-naming_conventions.mdc)
+[n8n-build-ui-error_handling.mdc](mdc:.cursor/rules/n8n-build-ui-error_handling.mdc)

@@ -1,0 +1,238 @@
+Analyze or implement n8n node data access following these guidelines:
+
+1. Direct Node Access:
+   Inline Expressions:
+   ```javascript
+   // Access by node name
+   {{ $("NodeName") }}                    // Reference node
+   {{ $("NodeName").item.json }}          // Current item data
+   {{ $("NodeName").item.binary }}        // Binary data
+   {{ $("NodeName").first() }}            // First item
+   {{ $("NodeName").last() }}             // Last item
+   {{ $("NodeName").all() }}              // All items
+   ```
+
+   Code Node:
+   ```javascript
+   // Access methods
+   $("NodeName").all()                    // Get all items
+   $("NodeName").first()                  // Get first item
+   $("NodeName").last()                   // Get last item
+   $("NodeName").itemMatching(criteria)   // Find specific item
+   ```
+
+2. Data Navigation:
+   Accessing Properties:
+   ```javascript
+   // Direct property access
+   {{ $("NodeName").item.json.property }}
+   {{ $("NodeName").first().json.nested.property }}
+
+   // Array access
+   {{ $("NodeName").all()[0].json.property }}
+   {{ $("NodeName").item.json.items[0].name }}
+   ```
+
+3. Multiple Node Access:
+   Combining Data:
+   ```javascript
+   // Access multiple nodes
+   const data1 = $("Node1").all();
+   const data2 = $("Node2").all();
+   
+   // Combine data
+   const combined = data1.map(item1 => ({
+     ...item1.json,
+     extraData: $("Node2").itemMatching(item2 => 
+       item2.json.id === item1.json.id
+     )
+   }));
+   ```
+
+4. Error Handling:
+   Safe Access:
+   ```javascript
+   // Check node existence
+   const nodeExists = $("NodeName") !== undefined;
+   
+   // Safe data access
+   try {
+     const data = $("NodeName")?.item?.json || {};
+   } catch (error) {
+     console.error('Node access error:', error);
+   }
+   ```
+
+5. Binary Data Access:
+   ```javascript
+   // Access binary data
+   const binaryData = $("FileNode").first().binary;
+   
+   // Process binary
+   if (binaryData) {
+     const { data, mimeType, fileName } = binaryData;
+     // Process binary data
+   }
+   ```
+
+6. Conditional Access:
+   ```javascript
+   // Check before access
+   const hasData = $("NodeName").all().length > 0;
+   
+   if (hasData) {
+     const data = $("NodeName").first().json;
+     // Process data
+   }
+   ```
+
+7. Data Transformation:
+   ```javascript
+   // Transform data from multiple nodes
+   const transformed = $("SourceNode").all().map(item => ({
+     id: item.json.id,
+     name: item.json.name,
+     details: $("DetailsNode").itemMatching(d => 
+       d.json.id === item.json.id
+     )?.json,
+     metadata: $("MetaNode").first().json
+   }));
+   ```
+
+8. Best Practices:
+   - Always verify node existence
+   - Use safe property access
+   - Handle missing data gracefully
+   - Document node dependencies
+   - Consider execution order
+   Example:
+   ```javascript
+   function safeNodeAccess(nodeName, defaultValue = null) {
+     try {
+       const node = $(nodeName);
+       if (!node) return defaultValue;
+       
+       const data = node.first()?.json;
+       return data || defaultValue;
+     } catch (error) {
+       console.error(`Error accessing node ${nodeName}:`, error);
+       return defaultValue;
+     }
+   }
+   ```
+
+9. Common Patterns:
+   Data Merging:
+   ```javascript
+   // Merge data from multiple nodes
+   const mergedData = $("MainNode").all().map(item => {
+     const details = $("DetailsNode").itemMatching(d => 
+       d.json.id === item.json.id
+     )?.json || {};
+     
+     const metadata = $("MetaNode").all().find(m => 
+       m.json.mainId === item.json.id
+     )?.json || {};
+     
+     return {
+       json: {
+         ...item.json,
+         ...details,
+         metadata
+       }
+     };
+   });
+   ```
+
+   Filtering:
+   ```javascript
+   // Filter based on other node's data
+   const filteredData = $("MainNode").all().filter(item => {
+     const isValid = $("ValidationNode").itemMatching(v => 
+       v.json.id === item.json.id
+     )?.json.isValid;
+     
+     return isValid === true;
+   });
+   ```
+
+10. Advanced Usage:
+    Complex Data Relations:
+    ```javascript
+    // Handle complex data relationships
+    function processRelatedData() {
+      const mainItems = $("MainNode").all();
+      const lookupData = $("LookupNode").all().reduce((acc, item) => {
+        acc[item.json.id] = item.json;
+        return acc;
+      }, {});
+      
+      return mainItems.map(item => {
+        const related = lookupData[item.json.relatedId] || {};
+        const metadata = $("MetaNode").itemMatching(m => 
+          m.json.mainId === item.json.id
+        )?.json || {};
+        
+        return {
+          json: {
+            ...item.json,
+            related,
+            metadata,
+            processed: true,
+            timestamp: $now.toISOString()
+          }
+        };
+      });
+    }
+    ```
+
+Example Implementation:
+```javascript
+// Comprehensive node data processing
+function processNodeData() {
+  try {
+    // Verify nodes exist
+    const requiredNodes = ['MainNode', 'DetailsNode', 'MetaNode'];
+    requiredNodes.forEach(nodeName => {
+      if (!$(nodeName)) {
+        throw new Error(`Required node ${nodeName} not found`);
+      }
+    });
+
+    // Get main data
+    const mainData = $("MainNode").all();
+    if (!mainData.length) {
+      throw new Error('No data found in MainNode');
+    }
+
+    // Process with related data
+    const processed = mainData.map(item => {
+      // Get related details
+      const details = $("DetailsNode").itemMatching(d => 
+        d.json.id === item.json.id
+      )?.json || {};
+
+      // Get metadata
+      const metadata = $("MetaNode").first()?.json || {};
+
+      // Combine all data
+      return {
+        json: {
+          id: item.json.id,
+          ...item.json,
+          details,
+          metadata,
+          processedAt: $now.toISOString()
+        }
+      };
+    });
+
+    return processed;
+  } catch (error) {
+    console.error('Error processing node data:', error);
+    throw error;
+  }
+}
+```
+
+The node data access implementation should: 

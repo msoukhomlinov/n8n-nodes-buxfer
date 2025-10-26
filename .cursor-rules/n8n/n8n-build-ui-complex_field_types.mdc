@@ -1,0 +1,123 @@
+---
+description: n8n node, Standards for implementing complex field types in n8n node development, including JSON, resource, and collection fields. [complex fields, collections, resources]
+globs: 
+alwaysApply: false
+---
+---
+description: n8n node, Standards for implementing complex field types in n8n node development, including JSON, resource, and collection fields. [complex fields, collections, resources]
+globs: 
+---
+# n8n Node Complex Field Types Standards
+
+1. JSON Fields
+   ```typescript
+   // Support both direct input and expressions
+   {
+     displayName: 'Data',
+     name: 'data',
+     type: 'json',
+     description: 'The data to process',
+     typeOptions: {
+       alwaysOpenEditWindow: true,  // Better for large JSON
+     },
+     default: '{\n  "example": "value"\n}',
+   }
+   ```
+
+2. Resource Fields
+   ```typescript
+   // Always first field after credentials
+   {
+     displayName: 'Resource',
+     name: 'resource',
+     type: 'options',
+     noDataExpression: true,
+     options: [
+       {
+         name: 'Task',
+         value: 'task',
+       }
+     ],
+     default: 'task',
+     description: 'Resource to operate on',
+   }
+   ```
+
+3. Collection Fields
+   ```typescript
+   // Group related optional fields
+   {
+     displayName: 'Additional Fields',
+     name: 'additionalFields',
+     type: 'collection',
+     placeholder: 'Add Field',
+     default: {},
+     options: [
+       {
+         displayName: 'Description',
+         name: 'description',
+         type: 'string',
+       }
+     ],
+   }
+   ```
+
+4. Fixed Collection Fields
+   ```typescript
+   // For required groups of fields
+   {
+     displayName: 'User Details',
+     name: 'userDetails',
+     type: 'fixedCollection',
+     default: {},
+     options: [
+       {
+         displayName: 'Details',
+         name: 'details',
+         values: [
+           {
+             displayName: 'Name',
+             name: 'name',
+             type: 'string',
+             required: true,
+           },
+           {
+             displayName: 'Email',
+             name: 'email',
+             type: 'string',
+             required: true,
+           }
+         ],
+       }
+     ],
+   }
+   ```
+
+5. Type Options
+   - Configure type-specific options
+   - Use load options when appropriate
+   - Handle loading states
+   - Provide error handling
+
+6. Collections
+   - Group logically related fields
+   - Use clear naming
+   - Limit nesting depth
+   - Handle defaults properly
+
+7. Resource Fields
+   - Place after credentials
+   - Use consistent naming
+   - Provide clear descriptions
+   - Handle all resource types
+
+8. JSON Handling
+   - Validate JSON structure
+   - Provide example formats
+   - Support expressions
+   - Handle large payloads
+
+## Dependencies
+[n8n-build-ui-design_standards.mdc](mdc:.cursor/rules/n8n-build-ui-design_standards.mdc)
+[n8n-build-ui-text_and_naming.mdc](mdc:.cursor/rules/n8n-build-ui-text_and_naming.mdc)
+[n8n-build-ui-basic_field_types.mdc](mdc:.cursor/rules/n8n-build-ui-basic_field_types.mdc)

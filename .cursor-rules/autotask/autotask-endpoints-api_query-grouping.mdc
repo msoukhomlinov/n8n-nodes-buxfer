@@ -1,0 +1,113 @@
+---
+description: logical operators, condition grouping, complex queries;Learn how to combine multiple filter conditions using logical operators and grouping
+globs: 
+alwaysApply: false
+---
+---
+description: logical operators, condition grouping, complex queries;Learn how to combine multiple filter conditions using logical operators and grouping
+globs:
+---
+
+# Query Condition Grouping
+
+## Logical Operators
+
+### Available Operators
+- `AND`: All conditions must be true
+- `OR`: At least one condition must be true
+
+## Query Structure
+
+### Basic Structure
+```json
+{
+    "filter": [
+        {
+            "op": "and",
+            "items": [
+                {"op": "eq", "field": "isActive", "value": true},
+                {"op": "gt", "field": "priority", "value": 2}
+            ]
+        }
+    ]
+}
+```
+
+### Nested Grouping
+```json
+{
+    "filter": [
+        {
+            "op": "or",
+            "items": [
+                {
+                    "op": "and",
+                    "items": [
+                        {"op": "eq", "field": "status", "value": 1},
+                        {"op": "gt", "field": "priority", "value": 3}
+                    ]
+                },
+                {
+                    "op": "and",
+                    "items": [
+                        {"op": "eq", "field": "status", "value": 2},
+                        {"op": "eq", "field": "isUrgent", "value": true}
+                    ]
+                }
+            ]
+        }
+    ]
+}
+```
+
+## Important Limitations
+1. Maximum nesting depth: 3 levels
+2. Maximum 500 OR conditions per query
+3. GET description: autotask rest api, limited by URL length (2048 characters)
+4. Use POST for complex queries
+
+## Best Practices
+
+### Query Optimisation
+1. Place most restrictive conditions first
+2. Group related conditions together
+3. Minimise OR operations where possible
+4. Consider breaking complex queries into multiple description: autotask rest api,
+
+### Common Patterns
+
+#### Date Range with Status
+```json
+{
+    "filter": [
+        {
+            "op": "and",
+            "items": [
+                {"op": "gte", "field": "createDate", "value": "2024-01-01"},
+                {"op": "lt", "field": "createDate", "value": "2024-04-01"},
+                {"op": "in", "field": "status", "value": [1, 2, 3]}
+            ]
+        }
+    ]
+}
+```
+
+#### Multiple Field Search
+```json
+{
+    "filter": [
+        {
+            "op": "or",
+            "items": [
+                {"op": "like", "field": "name", "value": "Smith"},
+                {"op": "like", "field": "email", "value": "smith"},
+                {"op": "like", "field": "company", "value": "Smith"}
+            ]
+        }
+    ]
+}
+```
+
+See related files:
+[autotask-endpoints-api_query-operations.mdc](mdc:.cursor/rules/autotask-endpoints-api_query-operations.mdc)
+[autotask-endpoints-api_filter-operators.mdc](mdc:.cursor/rules/autotask-endpoints-api_filter-operators.mdc)

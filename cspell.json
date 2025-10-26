@@ -1,0 +1,24 @@
+{
+  "version": "0.2",
+  "language": "en-AU",
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "build",
+    ".git",
+    ".github",
+    "**/*.png",
+    "**/*.jpg",
+    "**/*.svg"
+  ],
+  "dictionaries": ["softwareTerms"],
+  "dictionaryDefinitions": [],
+  "words": [
+    "cursorrules",
+    "prettier",
+    "markdownlint",
+    "lychee",
+    "dependabot"
+  ]
+}
+

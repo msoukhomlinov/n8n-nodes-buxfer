@@ -1,0 +1,90 @@
+---
+description: operators, filtering, comparison;Learn how to use filter operators for constructing precise API query conditions
+globs: 
+alwaysApply: false
+---
+---
+description: operators, filtering, comparison;Learn how to use filter operators for constructing precise API query conditions
+globs:
+---
+
+# Filter Operators
+
+## Available Operators
+
+### Comparison Operators
+| Operator | Description | Example |
+|----------|-------------|---------|
+| eq | Equal to | `{"op":"eq","field":"isActive","value":true}` |
+| noteq | Not equal to | `{"op":"noteq","field":"status","value":5}` |
+| gt | Greater than | `{"op":"gt","field":"amount","value":1000}` |
+| gte | Greater than or equal | `{"op":"gte","field":"priority","value":2}` |
+| lt | Less than | `{"op":"lt","field":"dueDate","value":"2024-03-20"}` |
+| lte | Less than or equal | `{"op":"lte","field":"quantity","value":50}` |
+
+### Text Operators
+| Operator | Description | Example |
+|----------|-------------|---------|
+| like | Contains text (case-insensitive) | `{"op":"like","field":"name","value":"Smith"}` |
+| notlike | Does not contain text | `{"op":"notlike","field":"description","value":"test"}` |
+| beginswith | Starts with text | `{"op":"beginswith","field":"email","value":"support"}` |
+| endswith | Ends with text | `{"op":"endswith","field":"domain","value":".com"}` |
+
+### Collection Operators
+| Operator | Description | Example |
+|----------|-------------|---------|
+| in | Value matches any in list | `{"op":"in","field":"status","value":[1,2,3]}` |
+| notin | Value matches none in list | `{"op":"notin","field":"type","value":["Demo","Test"]}` |
+| exist | Field exists | `{"op":"exist","field":"customField"}` |
+| notexist | Field does not exist | `{"op":"notexist","field":"deletedDate"}` |
+
+## Usage Guidelines
+
+### Data Type Considerations
+- Boolean values: Use `true` or `false` only
+- Dates: Use ISO 8601 format (YYYY-MM-DD)
+- Numbers: Use raw numeric values without quotes
+- Strings: Always enclose in quotes
+
+### Best Practices
+1. Use the most specific operator available
+2. Combine operators with AND/OR for complex queries
+3. Consider performance impact of wildcard operations
+4. Validate field names and data types before querying
+
+### Examples
+
+#### Complex Date Filtering
+```json
+{
+    "filter": [
+        {
+            "op": "gte",
+            "field": "createDate",
+            "value": "2024-01-01"
+        },
+        {
+            "op": "lt",
+            "field": "createDate",
+            "value": "2024-04-01"
+        }
+    ]
+}
+```
+
+#### Multiple Status Check
+```json
+{
+    "filter": [
+        {
+            "op": "in",
+            "field": "status",
+            "value": [1, 2, 3]
+        }
+    ]
+}
+```
+
+See related files:
+[autotask-endpoints-api_query-operations.mdc](mdc:.cursor/rules/autotask-endpoints-api_query-operations.mdc)
+[autotask-endpoints-api_query-grouping.mdc](mdc:.cursor/rules/autotask-endpoints-api_query-grouping.mdc)

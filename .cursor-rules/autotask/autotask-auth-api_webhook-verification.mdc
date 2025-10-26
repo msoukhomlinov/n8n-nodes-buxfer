@@ -1,0 +1,62 @@
+---
+description: webhook;security;verification;Learn how to verify webhook authenticity using secret keys and HMAC signatures
+globs: 
+alwaysApply: false
+---
+---
+description: webhook;security;verification;Learn how to verify webhook authenticity using secret keys and HMAC signatures
+---
+
+# Webhook Secret Key and Payload Verification
+
+## Overview
+To ensure webhook callout messages are authentic and complete, Autotask employs a shared secret key verification system using HMAC (Hash-based Message Authentication Code).
+
+## Secret Key Requirements
+- Maximum length: 64 characters
+- Allowed characters: Letters, numbers, and symbols
+- Recommended minimum length: 10 characters
+- Storage: Must be securely stored and never exposed in code
+
+## Verification Process
+
+### 1. Header Format
+The webhook includes an X-Hook-Signature header in the following format:
+```
+X-Hook-Signature: sha1=UaDXFl2DRDu9dnINVkFle7y5uAE=
+```
+
+### 2. Verification Steps
+1. Extract the X-Hook-Signature from the request headers
+2. Get the raw request body (payload)
+3. Using your stored secret key:
+   - Generate an HMAC-SHA1 hash of the request body
+   - Encode the result in Base64
+4. Compare your generated signature with the received X-Hook-Signature
+
+## Implementation Notes
+- Always use secure methods to store and retrieve the secret key
+- Implement constant-time string comparison for signature verification
+- Reject description: autotask rest api, with missing or invalid signatures
+- Process webhooks only after successful verification
+
+## Security Best Practices
+- Rotate secret keys periodically
+- Use environment variables for key storage
+- Implement request timeout checks
+- Log failed verification attempts
+- Use HTTPS for all webhook endpoints
+
+## Testing
+For development and testing purposes:
+1. Use the payload as the Input
+2. Use your secret key as the Key
+3. Select Base64 output format
+4. Verify the generated SHA1 hash matches the X-Hook-Signature
+
+## Error Handling
+Implement appropriate error responses for:
+- Missing signatures
+- Invalid signatures
+- Malformed payloads
+- Expired/invalid secret keys

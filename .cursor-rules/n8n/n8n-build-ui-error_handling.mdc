@@ -1,0 +1,178 @@
+---
+description: n8n node, Standards for implementing error handling and validation in n8n node development. [errors, validation, handling, messages]
+globs: 
+alwaysApply: false
+---
+---
+description: n8n node, Standards for implementing error handling and validation in n8n node development. [errors, validation, handling, messages]
+globs: 
+---
+# n8n Node Error Handling Standards
+
+1. Field Validation
+   ```typescript
+   // Basic field validation
+   {
+     displayName: 'Email',
+     name: 'email',
+     type: 'string',
+     required: true,
+     validateType: 'email',
+     errorMessage: {
+       title: 'Invalid email format',    // Main error in title
+       message: 'Please enter a valid email address', // Details in message
+     }
+   },
+
+   // Custom validation
+   {
+     displayName: 'Port',
+     name: 'port',
+     type: 'number',
+     default: 80,
+     validate: (value: number) => {
+       if (value < 1 || value > 65535) {
+         throw new Error('Port must be between 1 and 65535');
+       }
+     }
+   }
+   ```
+
+2. Runtime Error Handling
+   ```typescript
+   // API error handling with retries
+   try {
+     const maxRetries = 3;
+     let retryCount = 0;
+     let response;
+
+     while (retryCount < maxRetries) {
+       try {
+         response = await this.helpers.httpRequestWithAuthentication.call(
+           this,
+           'exampleApi',
+           {
+             url: 'https://api.example.com/data',
+             method: 'GET',
+           },
+         );
+         break;
+       } catch (error) {
+         if (error.response?.status === 429) {
+           retryCount++;
+           await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+           continue;
+         }
+         throw error;
+       }
+     }
+
+     if (!response.success) {
+       throw new NodeOperationError(
+         this.getNode(),
+         'API call failed',
+         {
+           description: response.error,
+           level: 'warning',
+           itemIndex: 0,
+         }
+       );
+     }
+   } catch (error) {
+     throw new NodeApiError(this.getNode(), error);
+   }
+
+   // Validation error handling
+   try {
+     const data = this.getNodeParameter('data', 0) as string;
+     const parsed = JSON.parse(data);
+     if (!parsed.required_field) {
+       throw new NodeOperationError(
+         this.getNode(),
+         'Missing required field',
+         {
+           description: 'The data must include required_field',
+           itemIndex: 0,
+         }
+       );
+     }
+   } catch (error) {
+     if (error instanceof SyntaxError) {
+       throw new NodeOperationError(
+         this.getNode(),
+         'Invalid JSON format',
+         {
+           description: 'Please check your JSON syntax',
+           itemIndex: 0,
+         }
+       );
+     }
+     throw error;
+   }
+   ```
+
+3. Error Types
+   ```typescript
+   // Operation errors (for business logic errors)
+   throw new NodeOperationError(
+     this.getNode(),
+     'Operation failed',
+     {
+       description: 'Detailed explanation of what went wrong',
+       level: 'warning',  // or 'error'
+       itemIndex: 0,
+     }
+   );
+
+   // API errors (for external API issues)
+   throw new NodeApiError(
+     this.getNode(),
+     error,  // Original error from API
+     {
+       message: 'Custom error message',
+       description: 'Additional context about the error',
+       itemIndex: 0,
+       httpCode: error.response?.status,
+     }
+   );
+
+   // Parameter errors (for invalid input)
+   throw new NodeParameterError(
+     this.getNode(),
+     'Invalid parameter value',
+     'parameterName'
+   );
+   ```
+
+4. Error Messages
+   - Use clear, actionable language
+   - Explain what went wrong
+   - Suggest how to fix it
+   - Include relevant details
+   - Link to troubleshooting guides
+
+5. Error Handling
+   - Implement proper retries
+   - Handle rate limits
+   - Use appropriate error types
+   - Include error context
+   - Log error details
+
+6. Error Types
+   - NodeOperationError for business logic
+   - NodeApiError for API issues
+   - NodeParameterError for invalid input
+   - Include all relevant context
+   - Set appropriate error levels
+
+7. Validation
+   - Validate early
+   - Use built-in validators
+   - Implement custom validation
+   - Handle edge cases
+   - Provide clear feedback
+
+## Dependencies
+[n8n-build-code_standards.mdc](mdc:.cursor/rules/n8n-build-code_standards.mdc)
+[n8n-build-ui-text_and_naming.mdc](mdc:.cursor/rules/n8n-build-ui-text_and_naming.mdc)
+[n8n-build-ui-help_text.mdc](mdc:.cursor/rules/n8n-build-ui-help_text.mdc)

@@ -1,0 +1,225 @@
+Analyze or implement n8n Code Node following these best practices:
+
+1. Code Organization:
+   - Use modular functions
+   - Keep functions small and focused
+   - Follow single responsibility principle
+   - Use descriptive variable names
+   - Add comprehensive comments
+   Example:
+   ```javascript
+   // Process user data with validation and transformation
+   function processUserData(userData) {
+     validateUserData(userData);
+     const enrichedData = enrichUserData(userData);
+     return transformUserData(enrichedData);
+   }
+   ```
+
+2. Error Handling:
+   - Use try-catch blocks appropriately
+   - Provide meaningful error messages
+   - Include error context
+   - Handle edge cases
+   - Implement fallback logic
+   Example:
+   ```javascript
+   try {
+     const result = await processData();
+     if (!isValidResult(result)) {
+       throw new Error('Invalid result structure');
+     }
+     return result;
+   } catch (error) {
+     console.error('Processing failed:', {
+       error: error.message,
+       context: error.context
+     });
+     return fallbackProcess();
+   }
+   ```
+
+3. Performance Optimization:
+   - Minimize API calls
+   - Use batch processing
+   - Implement caching where appropriate
+   - Optimize loops and iterations
+   - Monitor memory usage
+   Example:
+   ```javascript
+   // Batch process items efficiently
+   const batchSize = 100;
+   const results = [];
+   
+   for (let i = 0; i < items.length; i += batchSize) {
+     const batch = items.slice(i, i + batchSize);
+     const batchResults = await processBatch(batch);
+     results.push(...batchResults);
+   }
+   ```
+
+4. Data Validation:
+   - Validate all inputs
+   - Check data types
+   - Verify required fields
+   - Validate data formats
+   - Handle missing data
+   Example:
+   ```javascript
+   function validateData(data) {
+     const errors = [];
+     
+     // Required fields
+     if (!data.id) errors.push('Missing ID');
+     if (!data.email) errors.push('Missing email');
+     
+     // Data types
+     if (typeof data.age !== 'number') errors.push('Age must be a number');
+     
+     // Format validation
+     if (data.email && !isValidEmail(data.email)) {
+       errors.push('Invalid email format');
+     }
+     
+     if (errors.length > 0) {
+       throw new Error(`Validation failed: ${errors.join(', ')}`);
+     }
+   }
+   ```
+
+5. Code Documentation:
+   - Add function documentation
+   - Explain complex logic
+   - Document assumptions
+   - Include usage examples
+   - Note limitations
+   Example:
+   ```javascript
+   /**
+    * Processes user data with validation and enrichment
+    * @param {Object} userData - Raw user data
+    * @param {string} userData.id - User ID
+    * @param {string} userData.email - User email
+    * @returns {Object} Processed user data
+    * @throws {Error} If validation fails
+    */
+   function processUserData(userData) {
+     // Implementation
+   }
+   ```
+
+6. Resource Management:
+   - Close connections properly
+   - Release resources
+   - Handle timeouts
+   - Implement rate limiting
+   - Monitor resource usage
+   Example:
+   ```javascript
+   let connection;
+   try {
+     connection = await createConnection();
+     const result = await processWithTimeout(connection, 5000);
+     return result;
+   } finally {
+     if (connection) {
+       await connection.close();
+     }
+   }
+   ```
+
+7. Testing Considerations:
+   - Test edge cases
+   - Include error scenarios
+   - Test performance
+   - Verify data consistency
+   - Test integrations
+   Example:
+   ```javascript
+   // Test different scenarios
+   const testCases = [
+     { input: normalData, expected: 'success' },
+     { input: {}, expected: 'error' },
+     { input: null, expected: 'error' }
+   ];
+   
+   testCases.forEach(test => {
+     try {
+       const result = processData(test.input);
+       console.log(`Test ${test.expected}: ${result}`);
+     } catch (error) {
+       console.error(`Test failed: ${error.message}`);
+     }
+   });
+   ```
+
+8. Security Best Practices:
+   - Sanitize inputs
+   - Validate permissions
+   - Handle sensitive data
+   - Use secure methods
+   - Implement rate limiting
+   Example:
+   ```javascript
+   function processSecureData(data) {
+     // Sanitize input
+     const sanitized = sanitizeInput(data);
+     
+     // Check permissions
+     if (!hasPermission(sanitized.userId)) {
+       throw new Error('Unauthorized access');
+     }
+     
+     // Handle sensitive data
+     const processed = processSensitiveData(sanitized);
+     return maskSensitiveInfo(processed);
+   }
+   ```
+
+9. Maintainability:
+   - Use consistent formatting
+   - Follow naming conventions
+   - Keep code DRY
+   - Use version control
+   - Document changes
+   Example:
+   ```javascript
+   // Constants for configuration
+   const CONFIG = {
+     BATCH_SIZE: 100,
+     TIMEOUT_MS: 5000,
+     MAX_RETRIES: 3
+   };
+   
+   // Reusable utility functions
+   const utils = {
+     validateEmail: (email) => { /* ... */ },
+     formatDate: (date) => { /* ... */ },
+     sanitizeInput: (input) => { /* ... */ }
+   };
+   ```
+
+10. Integration Best Practices:
+    - Handle API responses
+    - Implement retry logic
+    - Use proper authentication
+    - Handle rate limits
+    - Log integration events
+    Example:
+    ```javascript
+    async function callExternalAPI(data) {
+      let retries = 0;
+      while (retries < MAX_RETRIES) {
+        try {
+          const response = await makeAPICall(data);
+          return handleResponse(response);
+        } catch (error) {
+          retries++;
+          if (retries === MAX_RETRIES) throw error;
+          await delay(exponentialBackoff(retries));
+        }
+      }
+    }
+    ```
+
+The Code Node implementation should follow these best practices to ensure: 

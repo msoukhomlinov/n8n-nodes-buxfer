@@ -1,0 +1,7 @@
+{
+  // Use Australian English style preferences in docs; line length set to 100 to match Prettier
+  "MD013": { "line_length": 100, "heading_line_length": 100, "code_block_line_length": 0 },
+  "MD033": false,
+  "MD041": false
+}
+

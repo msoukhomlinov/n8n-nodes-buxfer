@@ -1,0 +1,223 @@
+# Instructions
+
+During you interaction with the user, if you find anything reusable in this project (e.g. version of a library, model name), especially about a fix to a mistake you made or a correction you received, you should take note in the `Lessons` section in the `.cursorrules` file so you will not make the same mistake again.
+
+You should also use the `.cursorrules` file as a scratchpad to organize your thoughts. Especially when you receive a new task, you should first review the content of the scratchpad, clear old different task if necessary, first explain the task, and plan the steps you need to take to complete the task. You can use todo markers to indicate the progress, e.g.
+[X] Task 1
+[ ] Task 2
+
+Also update the progress of the task in the Scratchpad when you finish a subtask.
+Especially when you finished a milestone, it will help to improve your depth of task accomplishment to use the scratchpad to reflect and plan.
+The goal is to help you maintain a big picture as well as the progress of the task. Always refer to the Scratchpad when you plan the next step.
+
+# Documentation Files
+
+## Project Documentation
+Located in `/.docs`.
+
+### General References
+- `release-steps.md` - Steps for releasing versions of the project
+- `git-workflow-reference.md` - Git workflow processes and standards
+- `cursorai-resources.md` - Resources related to using Cursor AI
+- `n8n-resources.md` - Resources related to n8n development
+- `cursor-dotfiles-reference.md` - Reference for Cursor dotfiles configuration
+
+### Autotask Documentation
+Located in `/.docs/autotask`.
+
+#### Change Guidelines
+- `parent-entity-implementation-template.md` - Template for implementing parent entities
+- `child-entity-implementation-template.md` - Template for implementing child entities
+- `resource-execute-template.md` - Template for resource execution implementations
+
+#### Operations
+- `entity-info.md` - Information about entity operations
+
+## Cursor Rules Documentation
+Located in `/.cursor-rules`.
+
+### n8n Build Guidelines
+- `n8n-build-versioning_standards.mdc` - Standards for versioning in n8n integration
+- `n8n-build-ui-text_and_naming.mdc` - UI text and naming conventions
+- `n8n-build-ui-help_text.mdc` - Guidelines for writing help text
+- `n8n-build-ui-field_organisation.mdc` - Field organisation best practices
+- `n8n-build-ui-error_handling.mdc` - Error handling implementation
+- `n8n-build-ui-design_standards.mdc` - UI design standards and patterns
+- `n8n-build-ui-complex_field_types.mdc` - Complex field type implementation
+- `n8n-build-ui-common_patterns.mdc` - Common UI patterns for consistency
+- `n8n-build-ui-basic_field_types.mdc` - Basic field type implementation
+- `n8n-build-style-programmatic_style.mdc` - Programmatic code style guide
+- `n8n-build-style-declarative_style.mdc` - Declarative code style guide
+- `n8n-build-node_implementation.mdc` - Node implementation standards
+- `n8n-build-linting_standards.mdc` - Linting standards for code quality
+- `n8n-build-file_structure.mdc` - File structure organisation
+- `n8n-build-code_standards.mdc` - Code quality and style standards
+
+### n8n Security and General Guidelines
+- `n8n_security-security_standards.mdc` - Security standards for n8n integration
+- `n8n_general-technical_requirements.mdc` - Technical requirements and specifications
+- `n8n_general-naming_conventions.mdc` - Naming conventions for consistency
+- `n8n_general-documentation_standards.mdc` - Documentation standards and practices
+- `general-check_existing_files.mdc` - Guidelines for checking existing files
+
+### Node Guidelines
+- Node-specific guidelines (directory with additional files)
+
+### Troubleshooting
+- `n8n-troubleshooting-troubleshooting_guide.mdc` - Troubleshooting guide for n8n integration
+
+### Development Templates
+- `prompt-library-base-mode.cursorrules` - Base mode prompt templates
+- `prompt-library-enhanced-mode.cursorrules` - Enhanced mode prompt templates
+- `nodejs-typescript-orm-database.cursorrules` - Node.js/TypeScript ORM templates
+- `n8n-node-development.cursorrules` - n8n node development templates
+
+# MCP Server Tools Usage
+
+## Available MCP Servers
+
+### Core MCP Servers
+- **Sequential Thinking** - Multi-step reasoning and planning operations
+- **Puppeteer** - Browser automation and web interaction
+- **Brave Search** - Web search and local business search capabilities
+- **Firecrawl** - Advanced web scraping, crawling, and data extraction
+- **Task Manager** - Request planning and task management workflow
+- **Context7** - Library documentation and code context
+- **Memory Bank** - Project-specific persistent storage
+- **GitHub** - Repository management, issues, PRs, and code search
+
+## Strategic Tool Selection
+
+### Sequential Thinking Operations
+**Primary Use**: Complex multi-step operations requiring careful planning
+- Start with 8-12 total thoughts for complex tasks
+- Use branching to explore alternative approaches
+- Mark revisions when changing previous decisions
+- Set `needsMoreThoughts=true` when discovering new complexity
+- Essential for breaking down large changes into manageable chunks
+
+### GitHub Operations
+**Primary Use**: Repository management and code collaboration
+- **Repository Management**: Clone, fork, create repositories
+- **Issue Tracking**: Create, update, search, and manage issues
+- **Pull Requests**: Create, review, merge, and manage PRs
+- **Code Search**: Search across repositories and organisations
+- **Branch Management**: Create, switch, merge, and delete branches
+- **Commit Operations**: View history, create commits, manage changes
+
+**Best Practices**:
+- Always check repository permissions before operations
+- Use descriptive commit messages and PR descriptions
+- Search existing issues before creating new ones
+- Validate branch permissions before merging
+
+### Brave Search Operations
+**Primary Use**: Technical research and validation
+- Start with broad concept searches, then drill down
+- Cross-reference multiple sources before technical decisions
+- Research patterns: broad search → location-specific → recent discussions → validation
+
+### Firecrawl Operations
+**Primary Use**: Sophisticated web data extraction
+- **Single Page**: `firecrawl_scrape` for specific content
+- **Site Discovery**: `firecrawl_map` for URL discovery
+- **Comprehensive**: `firecrawl_crawl` for full site analysis
+- **Intelligent Search**: `firecrawl_search` with extraction
+- **Structured Data**: `firecrawl_extract` for specific formats
+- **Deep Research**: `firecrawl_deep_research` for comprehensive analysis
+
+### Puppeteer Operations
+**Primary Use**: Complex web interactions and testing
+- Navigation, screenshots, user interactions, JavaScript execution
+- Close pages when done, reuse browser instances
+- Monitor memory usage in long sessions
+
+### Task Manager Operations
+**Primary Use**: Complex workflows requiring user approval
+1. Plan request → Get next task → Complete task → Mark done
+2. Wait for user approval → Repeat → Final approval
+3. Best for structured progress tracking
+
+### Context7 Operations
+**Primary Use**: Up-to-date library documentation
+1. Resolve library name to Context7 ID
+2. Fetch documentation for API changes and implementation patterns
+
+### Memory Bank Operations
+**Primary Use**: Project-specific persistent knowledge
+- List projects, manage files, create/update knowledge
+- Store reusable insights and configurations
+
+## Operational Workflows
+
+### Research-Heavy Tasks
+1. **Sequential Thinking** → Plan research approach
+2. **Brave Search** → Initial broad research
+3. **Firecrawl** → Deep web research and documentation
+4. **Context7** → Specific library/framework docs
+5. **GitHub** → Search relevant repositories and issues
+6. Cross-reference findings before implementation
+
+### Complex Multi-Step Projects
+1. **Sequential Thinking** → Break down complexity
+2. **Task Manager** → Structure workflow with approval points
+3. **GitHub** → Repository setup and branch management
+4. **Memory Bank** → Store insights for future reference
+5. **Brave Search** → Validate approaches
+
+### Code Development Workflow
+1. **GitHub** → Search existing solutions and create issues
+2. **Sequential Thinking** → Plan implementation approach
+3. **Context7** → Get current library documentation
+4. **Memory Bank** → Retrieve stored patterns
+5. **GitHub** → Create PRs and manage code reviews
+
+### Web Interaction/Testing
+1. **Puppeteer** → Browser automation and testing
+2. **Firecrawl** → Comprehensive web data extraction
+3. **Memory Bank** → Store test results and configurations
+4. **GitHub** → Create issues for bugs found
+
+### Documentation and Learning
+1. **Context7** → Up-to-date library documentation
+2. **Firecrawl** → Extract information from official docs
+3. **GitHub** → Search community solutions and examples
+4. **Memory Bank** → Store learnings and patterns
+5. **Brave Search** → Find community best practices
+
+## Task Complexity Guidelines
+
+### Small Changes (< 30 lines)
+- **Sequential Thinking** (3-5 thoughts)
+- **GitHub** → Search existing implementations
+- Direct implementation with validation
+
+### Moderate Changes (30-100 lines)
+- **Sequential Thinking** (5-8 thoughts)
+- **Brave Search** → Research similar implementations
+- **GitHub** → Check existing issues and PRs
+- Plan validation points before execution
+
+### Large Changes (100+ lines)
+- **Sequential Thinking** (10+ thoughts)
+- **Task Manager** → Structure with approval points
+- **Brave Search** + **Firecrawl** → Extensive research
+- **GitHub** → Comprehensive repository analysis
+- **Memory Bank** → Store operational memory
+- Regular validation checkpoints
+
+## Tool Combination Patterns
+
+- **Planning**: Sequential Thinking → Task Manager → Memory Bank
+- **Research**: Sequential Thinking → Brave Search → Firecrawl → Context7 → GitHub
+- **Implementation**: Sequential Thinking → Context7 → GitHub → Memory Bank
+- **Testing**: Sequential Thinking → Puppeteer → Memory Bank → GitHub
+- **Documentation**: Memory Bank → Firecrawl → GitHub → Context7
+
+# Lessons
+- Use n8n error types (`NodeApiError`, `NodeOperationError`) when throwing from nodes to align with current docs.
+- Prefer 429 status for rate limit detection; avoid brittle message matching.
+- Keep Autotask REST URLs consistent without trailing slashes.
+- Attachment content endpoints use `/data` and require both parent entity ID and attachment ID.
+
+# Scratchpad

@@ -1,0 +1,144 @@
+---
+description: POST, Resources, Creation; Comprehensive guide for creating new resources through Autotask REST API endpoints
+globs: 
+alwaysApply: false
+---
+---
+description: POST, Resources, Creation; Comprehensive guide for creating new resources through Autotask REST API endpoints
+globs:
+---
+
+# Resource Creation Guide
+
+## Overview
+This guide details how to create new resources using POST operations in the Autotask REST API. It covers single and bulk creation methods, validation requirements, and best practices.
+
+## Single Resource Creation
+
+### Basic POST Structure
+```http
+POST /ATServicesRest/V1.0/{entityType}
+Content-Type: application/json
+Authorization: Basic {base64EncodedCredentials}
+
+{
+    "fieldName1": "value1",
+    "fieldName2": "value2"
+}
+```
+
+### Required Headers
+- `Content-Type: application/json`
+- `Authorization`: Basic authentication header
+- `ApiIntegrationCode`: Your integration code
+- `UserName`: API user username
+- `Secret`: API user private key
+
+### Response Format
+```json
+{
+    "item": {
+        "id": 12345,
+        "fieldName1": "value1",
+        "fieldName2": "value2"
+    }
+}
+```
+
+## Validation Rules
+1. Required Fields
+   - Must include all mandatory fields
+   - System will reject description: autotask rest api, missing required fields
+   - Check entity documentation for field requirements
+
+2. Field Types
+   - String fields: Respect maximum length
+   - Numeric fields: Use appropriate number format
+   - Boolean fields: Use true/false values
+   - Date fields: Use ISO 8601 format
+
+3. Business Rules
+   - Entity-specific validation rules apply
+   - Parent-child relationships must be valid
+   - Reference fields must contain valid IDs
+
+## Error Handling
+
+### Common Error Scenarios
+- 400: Missing required fields
+- 422: Validation errors
+- 409: Unique constraint violations
+- 403: Insufficient permissions
+
+### Error Response Format
+```json
+{
+    "errors": [
+        {
+            "message": "Detailed error message",
+            "code": "ErrorCode",
+            "field": "fieldName"
+        }
+    ]
+}
+```
+
+## Best Practices
+
+### Performance
+1. Batch Creation
+   - Use bulk operations for multiple items
+   - Limit batch size to 50 items
+   - Handle partial success scenarios
+
+2. Rate Limiting
+   - Monitor API usage thresholds
+   - Implement exponential backoff
+   - Cache frequently used data
+
+### Security
+1. Input Validation
+   - Sanitise user inputs
+   - Validate data types
+   - Check field length limits
+
+2. Error Management
+   - Log failed operations
+   - Implement retry logic
+   - Handle timeouts gracefully
+
+## Examples
+
+### Creating a Company
+```json
+POST /ATServicesRest/V1.0/Companies
+{
+    "companyName": "Example Corp",
+    "phone": "+61 2 1234 5678",
+    "address1": "123 Business St",
+    "city": "Sydney",
+    "state": "NSW",
+    "postalCode": "2000",
+    "country": "Australia",
+    "active": true
+}
+```
+
+### Creating a Contact
+```json
+POST /ATServicesRest/V1.0/Contacts
+{
+    "firstName": "John",
+    "lastName": "Smith",
+    "emailAddress": "john.smith@example.com",
+    "companyID": 12345,
+    "isActive": true
+}
+```
+
+## Troubleshooting Tips
+1. Verify all required fields are included
+2. Check field data types match specifications
+3. Ensure parent resources exist for relationships
+4. Validate unique constraints before submission
+5. Monitor API response headers for rate limiting

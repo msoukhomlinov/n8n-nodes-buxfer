@@ -1,0 +1,81 @@
+---
+description: webhooks;integration;realtime;Guide for implementing Autotask webhooks for real-time data synchronisation and integration
+globs: 
+alwaysApply: false
+---
+---
+description: webhooks;integration;realtime;Guide for implementing Autotask webhooks for real-time data synchronisation and integration
+---
+
+# Autotask Webhooks Overview
+
+Webhooks provide an efficient mechanism for real-time data exchange between Autotask and external applications. Unlike traditional polling-based API approaches, webhooks follow a push-based notification system where Autotask sends HTTP POST description: autotask rest api, to your specified endpoint whenever relevant events occur.
+
+## Key Benefits
+
+- Near real-time notifications of data changes
+- Reduced API call volume and improved performance
+- More efficient resource utilisation
+- Simplified integration development
+- Lower implementation costs
+
+## Supported Entities
+
+The following Autotask entities support webhook notifications:
+
+- Companies (Accounts)
+- Contacts
+- Assets (Configuration Items)
+- Tickets (including Taskfire-created)
+- Ticket Notes (including Taskfire-created)
+
+## Webhook Events
+
+Webhooks can be triggered by these events:
+
+- **Create:** Fires when new records are created
+- **Update:** Triggers when specified fields or UDFs are modified
+- **Delete:** Activates when records are deleted
+- **Deactivate:** Occurs when webhook encounters persistent delivery failures
+
+## Technical Specifications
+
+- **Protocol:** HTTPS
+- **Method:** POST
+- **Port:** 443
+- **Payload Format:** JSON
+- **API Version Required:** REST API v1.0 or above
+
+## Common Use Cases
+
+Webhooks are particularly useful for synchronising data with:
+
+- Lead generation software
+- CRM platforms
+- Quoting systems
+- Accounting software
+
+## Security Considerations
+
+- Webhooks operate under the security context of their owner resource
+- Entity and object-level permissions apply to webhook triggers
+- Protected Data Permissions affect webhook operation
+- Line of Business access controls are enforced
+
+## Implementation Requirements
+
+1. **API Access Level:**
+   - Integration developers must have API-only security level
+   - Explicit webhook creation permission is required
+   - Maximum webhook count can be configured per security level
+
+2. **Resource Configuration:**
+   - Separate security level recommended per integration
+   - Resource permissions must match webhook operation needs
+   - Delete operations require explicit delete permissions
+
+For detailed implementation guides, see:
+[autotask-webhooks-api_setup.mdc](mdc:.cursor/rules/autotask-webhooks-api_setup.mdc)
+[autotask-webhooks-api_examples.mdc](mdc:.cursor/rules/autotask-webhooks-api_examples.mdc)
+[autotask-webhooks-api_errors.mdc](mdc:.cursor/rules/autotask-webhooks-api_errors.mdc)
+[autotask-webhooks-api_payload.mdc](mdc:.cursor/rules/autotask-webhooks-api_payload.mdc)

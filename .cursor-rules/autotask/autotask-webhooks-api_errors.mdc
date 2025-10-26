@@ -1,0 +1,73 @@
+---
+description: webhooks;errors;retry | Comprehensive guide for handling webhook delivery failures and error notifications in Autotask
+globs: 
+alwaysApply: false
+---
+---
+description: webhooks;errors;retry | Comprehensive guide for handling webhook delivery failures and error notifications in Autotask
+---
+
+# Webhook Error Handling
+
+The webhook error handling system consists of two main processes:
+1. Individual payload delivery failure handling
+2. Bulk failure deactivation process
+
+## Payload Delivery Failure Process
+
+When a webhook event triggers, the following error handling process occurs:
+
+1. Initial delivery attempt with 10-second timeout
+2. If failed, enters retry queue with following parameters:
+   - Maximum 5 retry attempts
+   - 30-second intervals between retries
+   - 2-minute total retry window
+
+### Error Logging
+- Failed deliveries are logged in the Webhook Error Log
+- Log entries retained for 30 days
+- Payload can be retrieved via WebhookEventErrorLogs endpoint
+
+### Notification Process
+- Error notifications sent to:
+  - Webhook owner
+  - Configured notification email address
+- Sent on first failed retry in sequence
+- One notification per day
+
+## Webhook Deactivation Process
+
+A webhook becomes deactivated under these conditions:
+- 25+ consecutive delivery failures
+- Failures occur across different events
+- Failures span > 4 hours
+- Any successful delivery resets the counter
+
+### Important Notes
+- Deactivation notifications sent to separate Deactivation URL
+- Webhook URL and Deactivation URL should be on different servers
+- Deactivated webhooks require manual reactivation via API
+
+## Error Notification Format
+
+```
+Subject: Autotask Callout - Error: [callout name]
+
+Body:
+The following Autotask callout has failed to trigger the last 5 times it attempted delivery:
+
+Callout: [callout name]
+For: [customer name]
+Created By: [created by] ([create date])
+
+If this callout fails for [25] consecutive attempts, it will be disabled.
+
+This message was auto-generated. Please do not reply.
+```
+
+## Best Practices
+1. Configure separate webhook and deactivation URLs
+2. Monitor webhook error logs regularly
+3. Implement proper error handling at the receiving endpoint
+4. Maintain quick response times (< 10 seconds)
+5. Plan for webhook reactivation process

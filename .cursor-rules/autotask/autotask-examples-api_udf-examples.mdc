@@ -1,0 +1,180 @@
+---
+description: examples, UDF, implementation; Practical code examples for working with Autotask User-defined Fields in API integrations
+globs: 
+alwaysApply: false
+---
+---
+description: examples, UDF, implementation; Practical code examples for working with Autotask User-defined Fields in API integrations
+---
+
+# User-defined Fields Examples
+
+This guide provides practical examples for working with Autotask UDFs in various scenarios.
+
+## Retrieving UDF Definitions
+
+```powershell
+# Get UDF definitions for Companies
+$response = Invoke-RestMethod `
+    -Uri "https://api.autotask.net/ATServicesRest/V1.0/EntityInformation/UDFs/Companies" `
+    -Headers @{
+        "ApiIntegrationcode" = $env:AT_INTEGRATION_CODE
+        "UserName" = $env:AT_USERNAME
+        "Secret" = $env:AT_SECRET
+    }
+
+# Process UDF definitions
+$udfDefinitions = $response.items | ForEach-Object {
+    @{
+        Name = $_.name
+        Label = $_.label
+        Type = $_.dataType
+        IsRequired = $_.isRequired
+    }
+}
+```
+
+## Querying Entities with UDF Filters
+
+```powershell
+# Query companies with specific UDF value
+$query = @{
+    filter = @(
+        @{
+            field = "UDF_CustomerType"
+            op = "eq"
+            value = "Enterprise"
+        }
+    )
+} | ConvertTo-Json
+
+$response = Invoke-RestMethod `
+    -Uri "https://api.autotask.net/ATServicesRest/V1.0/Companies/query" `
+    -Method POST `
+    -Body $query `
+    -ContentType "application/json" `
+    -Headers @{
+        "ApiIntegrationcode" = $env:AT_INTEGRATION_CODE
+        "UserName" = $env:AT_USERNAME
+        "Secret" = $env:AT_SECRET
+    }
+```
+
+## Updating UDF Values
+
+```powershell
+# Update UDF value for a company
+$updateData = @{
+    UDF_CustomerType = "Premium"
+    UDF_LastReviewDate = (Get-Date).ToString("yyyy-MM-dd")
+} | ConvertTo-Json
+
+$response = Invoke-RestMethod `
+    -Uri "https://api.autotask.net/ATServicesRest/V1.0/Companies/123" `
+    -Method PATCH `
+    -Body $updateData `
+    -ContentType "application/json" `
+    -Headers @{
+        "ApiIntegrationcode" = $env:AT_INTEGRATION_CODE
+        "UserName" = $env:AT_USERNAME
+        "Secret" = $env:AT_SECRET
+    }
+```
+
+## Complex Query Example
+
+```powershell
+# Query companies with multiple UDF conditions
+$query = @{
+    filter = @(
+        @{
+            field = "UDF_AnnualRevenue"
+            op = "gt"
+            value = 1000000
+        },
+        @{
+            field = "UDF_Industry"
+            op = "contains"
+            value = "Technology"
+        }
+    )
+    includeFields = @(
+        "id",
+        "companyName",
+        "UDF_AnnualRevenue",
+        "UDF_Industry",
+        "UDF_LastReviewDate"
+    )
+} | ConvertTo-Json
+
+$response = Invoke-RestMethod `
+    -Uri "https://api.autotask.net/ATServicesRest/V1.0/Companies/query" `
+    -Method POST `
+    -Body $query `
+    -ContentType "application/json" `
+    -Headers @{
+        "ApiIntegrationcode" = $env:AT_INTEGRATION_CODE
+        "UserName" = $env:AT_USERNAME
+        "Secret" = $env:AT_SECRET
+    }
+```
+
+## Error Handling Example
+
+```powershell
+try {
+    $response = Invoke-RestMethod `
+        -Uri "https://api.autotask.net/ATServicesRest/V1.0/Companies/123" `
+        -Method PATCH `
+        -Body $updateData `
+        -ContentType "application/json" `
+        -Headers $headers
+} catch {
+    $statusCode = $_.Exception.Response.StatusCode.value__
+
+    switch ($statusCode) {
+        400 { Write-Error "Invalid UDF value type or format" }
+        404 { Write-Error "UDF or entity not found" }
+        403 { Write-Error "Insufficient permissions" }
+        default { Write-Error "An unexpected error occurred: $_" }
+    }
+}
+```
+
+## Validation Helper Function
+
+```powershell
+function Test-UDFValue {
+    param(
+        [string]$fieldName,
+        $value,
+        [hashtable]$udfDefinitions
+    )
+
+    $udf = $udfDefinitions[$fieldName]
+    if (-not $udf) {
+        return $false, "UDF not found"
+    }
+
+    switch ($udf.Type) {
+        "Integer" {
+            if ($value -isnot [int]) {
+                return $false, "Value must be an integer"
+            }
+        }
+        "Currency" {
+            if ($value -isnot [decimal]) {
+                return $false, "Value must be a decimal"
+            }
+        }
+        "Date" {
+            try {
+                [datetime]::Parse($value) | Out-Null
+            } catch {
+                return $false, "Invalid date format"
+            }
+        }
+    }
+
+    return $true, "Valid"
+}

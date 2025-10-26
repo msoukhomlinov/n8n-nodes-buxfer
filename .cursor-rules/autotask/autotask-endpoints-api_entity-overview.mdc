@@ -1,0 +1,98 @@
+---
+description: Entities, Resources, Schema; Comprehensive guide to Autotask API entity types and their relationships
+globs: 
+alwaysApply: false
+---
+---
+description: Entities, Resources, Schema; Comprehensive guide to Autotask API entity types and their relationships
+globs:
+---
+
+# Autotask API Entity Overview
+
+## Introduction
+Autotask's REST API provides access to various business entities through standardised endpoints. Each entity represents a specific business object with its own properties, relationships, and operations.
+
+## Entity Types
+
+### Core Business Entities
+- Accounts
+- Contacts
+- Opportunities
+- Projects
+- Tickets
+- Tasks
+- Time Entries
+- Contracts
+
+### Supporting Entities
+- Products
+- Services
+- Resources
+- Configurations
+- Documents
+- Notes
+
+## Entity Properties
+
+### Common Fields
+All entities include these standard fields:
+- `id`: Unique identifier
+- `createDate`: UTC timestamp of creation
+- `lastModifiedDate`: UTC timestamp of last update
+- `userDefinedFields`: Custom field collection
+
+### Field Types
+- Text (string)
+- Numbers (integer/decimal)
+- Dates (UTC format)
+- Boolean
+- Picklist (enumerated values)
+- References (foreign keys)
+
+## Entity Relationships
+
+### Parent-Child Relationships
+- Accounts → Contacts
+- Projects → Tasks
+- Tickets → Time Entries
+
+### Many-to-Many Relationships
+- Contracts ↔ Services
+- Resources ↔ Projects
+- Products ↔ Configurations
+
+## Entity Operations
+
+### Standard Operations
+- GET: Retrieve entity details
+- POST: Create new entities
+- PUT: Update entire entity
+- PATCH: Partial entity updates
+- DELETE: Remove entities
+
+### Collection Operations
+- Query multiple entities
+- Filter results
+- Sort and page data
+- Include related entities
+
+## Best Practices
+
+### Performance Optimisation
+- Request only needed fields
+- Use appropriate page sizes
+- Implement caching where suitable
+- Follow rate limiting guidelines
+
+### Data Integrity
+- Validate required fields
+- Check field constraints
+- Handle dependencies correctly
+- Maintain referential integrity
+
+## See Also
+[autotask-endpoints-api_entity-information.mdc](mdc:.cursor/rules/autotask-endpoints-api_entity-information.mdc)
+[autotask-endpoints-api_resource-access.mdc](mdc:.cursor/rules/autotask-endpoints-api_resource-access.mdc)
+[autotask-endpoints-api_query-operations.mdc](mdc:.cursor/rules/autotask-endpoints-api_query-operations.mdc)
+[autotask-endpoints-api_data-operations.mdc](mdc:.cursor/rules/autotask-endpoints-api_data-operations.mdc)

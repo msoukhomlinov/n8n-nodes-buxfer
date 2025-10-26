@@ -1,0 +1,278 @@
+---
+description: n8n node, Guidelines for implementing n8n nodes using the programmatic style, providing full control over execution flow and data handling. [programmatic, execute, custom logic, complex operations, data processing]
+globs: 
+alwaysApply: false
+---
+---
+description: n8n node, Guidelines for implementing n8n nodes using the programmatic style, providing full control over execution flow and data handling. [programmatic, execute, custom logic, complex operations, data processing]
+globs: 
+---
+# n8n Node Programmatic Style Implementation
+
+1. Node Structure
+   ```typescript
+   export class MyComplexNode implements INodeType {
+     description: INodeTypeDescription = {
+       displayName: 'My Complex Node',
+       name: 'myComplexNode',
+       icon: 'file:mycomplex.svg',
+       group: ['transform'],
+       version: 1,
+       subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
+       description: 'Work with Complex Operations',
+       defaults: {
+         name: 'My Complex Node',
+       },
+       properties: [
+         // Properties defined below
+       ],
+     };
+
+     async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+       // Implementation
+     }
+   }
+   ```
+
+2. Resource and Operation Properties
+   ```typescript
+   properties: [
+     {
+       displayName: 'Resource',
+       name: 'resource',
+       type: 'options',
+       noDataExpression: true,
+       options: [
+         {
+           name: 'Contact',
+           value: 'contact',
+         },
+       ],
+       default: 'contact',
+     },
+     {
+       displayName: 'Operation',
+       name: 'operation',
+       type: 'options',
+       displayOptions: {
+         show: {
+           resource: [
+             'contact',
+           ],
+         },
+       },
+       options: [
+         {
+           name: 'Create',
+           value: 'create',
+           description: 'Create a new contact',
+           action: 'Create a contact',
+         },
+       ],
+       default: 'create',
+     },
+   ]
+   ```
+
+3. Execute Method Implementation
+   ```typescript
+   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+     const items = this.getInputData();
+     const returnData: INodeExecutionData[] = [];
+     const resource = this.getNodeParameter('resource', 0) as string;
+     const operation = this.getNodeParameter('operation', 0) as string;
+     
+     // Process all input items
+     for (let i = 0; i < items.length; i++) {
+       try {
+         // Get parameters for current item
+         const email = this.getNodeParameter('email', i) as string;
+         const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
+
+         // Get credentials
+         const credentials = await this.getCredentials('myApi') as IDataObject;
+
+         // Make API request
+         const options: IRequestOptions = {
+           method: 'POST',
+           uri: 'https://api.example.com/v1/contacts',
+           headers: {
+             'Authorization': `Bearer ${credentials.apiKey}`,
+             'Content-Type': 'application/json',
+           },
+           body: {
+             email,
+             ...additionalFields,
+           },
+           json: true,
+         };
+
+         const response = await this.helpers.request(options);
+         returnData.push({ json: response });
+       } catch (error) {
+         if (this.continueOnFail()) {
+           returnData.push({ json: { error: error.message } });
+           continue;
+         }
+         throw error;
+       }
+     }
+     
+     return [returnData];
+   }
+   ```
+
+4. Helper Methods
+   ```typescript
+   // In GenericFunctions.ts
+   export async function apiRequest(
+     this: IExecuteFunctions | ILoadOptionsFunctions,
+     method: string,
+     endpoint: string,
+     body: IDataObject = {},
+     qs: IDataObject = {},
+   ): Promise<any> {
+     const credentials = await this.getCredentials('myApi');
+     const options: IRequestOptions = {
+       method,
+       uri: `https://api.example.com/v1${endpoint}`,
+       qs,
+       body,
+       headers: {
+         'Authorization': `Bearer ${credentials.apiKey}`,
+       },
+       json: true,
+     };
+     
+     try {
+       return await this.helpers.request(options);
+     } catch (error) {
+       throw new NodeApiError(this.getNode(), error);
+     }
+   }
+   ```
+
+5. Credentials Setup
+   ```typescript
+   export class MyApiCredentials implements ICredentialType {
+     name = 'myApi';
+     displayName = 'My API';
+     documentationUrl = 'myapi';
+     
+     properties: INodeProperties[] = [
+       {
+         displayName: 'API Key',
+         name: 'apiKey',
+         type: 'string',
+         typeOptions: {
+           password: true,
+         },
+         required: true,
+       },
+     ];
+
+     test: ICredentialTestRequest = {
+       request: {
+         baseURL: 'https://api.example.com/v1',
+         url: '/test-auth',
+         method: 'GET',
+       },
+     };
+   }
+   ```
+
+6. Error Handling
+   ```typescript
+   try {
+     // API request implementation
+   } catch (error) {
+     if (error.response) {
+       const errorMessage = error.response.data?.message || error.message;
+       throw new NodeApiError(this.getNode(), error, {
+         message: errorMessage,
+         description: `Request to ${error.config?.url} failed`,
+         httpCode: error.response.status,
+       });
+     }
+     throw error;
+   }
+   ```
+
+7. Node Metadata (Codex)
+   ```json
+   {
+     "node": "n8n-nodes-base.MyComplex",
+     "nodeVersion": "1.0",
+     "codexVersion": "1.0",
+     "categories": [
+       "Development"
+     ],
+     "resources": {
+       "credentialDocumentation": [
+         {
+           "url": "https://docs.myapi.com/authentication"
+         }
+       ],
+       "primaryDocumentation": [
+         {
+           "url": "https://docs.myapi.com/api"
+         }
+       ]
+     }
+   }
+   ```
+
+8. Package Configuration
+   ```json
+   {
+     "name": "n8n-nodes-mycomplex",
+     "version": "1.0.0",
+     "description": "Complex operations node for n8n",
+     "keywords": [
+       "n8n-community-node-package"
+     ],
+     "n8n": {
+       "n8nNodesApiVersion": 1,
+       "credentials": [
+         "dist/credentials/MyApi.credentials.js"
+       ],
+       "nodes": [
+         "dist/nodes/MyComplex/MyComplex.node.js"
+       ]
+     }
+   }
+   ```
+
+9. Handle Multiple Items
+   - Process all input items in a loop
+   - Use proper error handling per item
+   - Support continueOnFail functionality
+
+10. API Integration
+    - Create reusable helper methods
+    - Implement proper rate limiting
+    - Handle pagination efficiently
+    - Use typed interfaces for API responses
+
+11. Error Management
+    - Use NodeApiError for API errors
+    - Provide detailed error messages
+    - Include HTTP status codes
+    - Support debugging information
+
+12. Performance
+    - Implement batch operations where possible
+    - Use proper memory management
+    - Handle large datasets efficiently
+    - Implement timeouts
+
+13. Testing
+    - Test with multiple input scenarios
+    - Verify error handling
+    - Test credential validation
+    - Check pagination handling
+
+## Dependencies
+[n8n-build-node_implementation.mdc](mdc:.cursor/rules/n8n-build-node_implementation.mdc)
+[n8n-build-code_standards.mdc](mdc:.cursor/rules/n8n-build-code_standards.mdc)
+[n8n_security-security_standards.mdc](mdc:.cursor/rules/n8n_security-security_standards.mdc)

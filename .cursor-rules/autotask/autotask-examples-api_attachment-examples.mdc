@@ -1,0 +1,233 @@
+---
+description: examples,implementation,code;Learn practical implementation patterns for handling Autotask API attachment operations
+globs: 
+alwaysApply: false
+---
+---
+description: examples,implementation,code;Learn practical implementation patterns for handling Autotask API attachment operations
+globs:
+---
+
+# Attachment Implementation Examples
+
+## PowerShell Implementation Examples
+
+### Upload File Attachment
+```powershell
+# Function to upload file attachment to a ticket
+function Add-TicketAttachment {
+    param(
+        [int]$TicketId,
+        [string]$FilePath,
+        [hashtable]$Headers
+    )
+
+    try {
+        # Read and encode file content
+        $fileContent = [Convert]::ToBase64String([IO.File]::ReadAllBytes($FilePath))
+        $fileName = Split-Path $FilePath -Leaf
+
+        $body = @{
+            attachmentType = "FILE_ATTACHMENT"
+            fullPath = $fileName
+            title = $fileName
+            publish = 1
+            data = $fileContent
+        } | ConvertTo-Json
+
+        $uri = "https://ww6.autotask.net/atservicesrest/v1.0/Tickets/$TicketId/Attachments"
+
+        $response = Invoke-RestMethod `
+            -Uri $uri `
+            -Method Post `
+            -Headers $Headers `
+            -Body $body `
+            -ContentType 'application/json'
+
+        return $response
+    }
+    catch {
+        Write-Error "Failed to upload attachment: $_"
+        throw
+    }
+}
+```
+
+### Query Attachments
+```powershell
+# Function to get all attachments for an entity
+function Get-EntityAttachments {
+    param(
+        [string]$EntityType,
+        [int]$EntityId,
+        [hashtable]$Headers
+    )
+
+    try {
+        $filter = @{
+            filter = @(
+                @{
+                    op = "eq"
+                    field = "ParentID"
+                    value = $EntityId
+                }
+            )
+        }
+
+        $query = [System.Web.HttpUtility]::UrlEncode(($filter | ConvertTo-Json -Compress))
+        $uri = "https://ww6.autotask.net/atservicesrest/v1.0/AttachmentInfo/query?search=$query"
+
+        $response = Invoke-RestMethod `
+            -Uri $uri `
+            -Method Get `
+            -Headers $Headers
+
+        return $response
+    }
+    catch {
+        Write-Error "Failed to query attachments: $_"
+        throw
+    }
+}
+```
+
+### Delete Attachment
+```powershell
+# Function to remove an attachment
+function Remove-EntityAttachment {
+    param(
+        [string]$EntityType,
+        [int]$EntityId,
+        [int]$AttachmentId,
+        [hashtable]$Headers
+    )
+
+    try {
+        $uri = "https://ww6.autotask.net/atservicesrest/v1.0/$EntityType/$EntityId/Attachments/$AttachmentId"
+
+        $response = Invoke-RestMethod `
+            -Uri $uri `
+            -Method Delete `
+            -Headers $Headers
+
+        return $response
+    }
+    catch {
+        Write-Error "Failed to delete attachment: $_"
+        throw
+    }
+}
+```
+
+## Usage Examples
+
+### Upload Multiple Files
+```powershell
+# Example of uploading multiple files with rate limiting
+$headers = @{
+    'ApiIntegrationcode' = 'YOUR_INTEGRATION_CODE'
+    'UserName' = 'YOUR_USERNAME'
+    'Secret' = 'YOUR_SECRET'
+    'Content-Type' = 'application/json'
+}
+
+$ticketId = 12345
+$files = Get-ChildItem "C:\Documents\*.pdf"
+$byteCount = 0
+$timeWindow = [DateTime]::Now
+
+foreach ($file in $files) {
+    # Check rate limit
+    if ($byteCount + $file.Length -gt 10000000) {
+        $waitTime = 300 - ([DateTime]::Now - $timeWindow).TotalSeconds
+        if ($waitTime -gt 0) {
+            Start-Sleep -Seconds $waitTime
+        }
+        $byteCount = 0
+        $timeWindow = [DateTime]::Now
+    }
+
+    Add-TicketAttachment -TicketId $ticketId -FilePath $file.FullName -Headers $headers
+    $byteCount += $file.Length
+}
+```
+
+### Bulk Attachment Management
+```powershell
+# Example of managing attachments across entities
+$headers = @{
+    'ApiIntegrationcode' = 'YOUR_INTEGRATION_CODE'
+    'UserName' = 'YOUR_USERNAME'
+    'Secret' = 'YOUR_SECRET'
+    'Content-Type' = 'application/json'
+}
+
+# Get all attachments for a ticket
+$ticketAttachments = Get-EntityAttachments -EntityType "Tickets" -EntityId 12345 -Headers $headers
+
+# Process attachments
+foreach ($attachment in $ticketAttachments) {
+    if ($attachment.fileSize -gt 5MB) {
+        Write-Warning "Large attachment found: $($attachment.title)"
+        # Optional: Remove large attachments
+        Remove-EntityAttachment -EntityType "Tickets" -EntityId 12345 -AttachmentId $attachment.id -Headers $headers
+    }
+}
+```
+
+## Error Handling Examples
+
+### Robust Upload Implementation
+```powershell
+# Example with comprehensive error handling
+function Add-RobustTicketAttachment {
+    param(
+        [int]$TicketId,
+        [string]$FilePath,
+        [hashtable]$Headers,
+        [int]$MaxRetries = 3
+    )
+
+    $attempt = 0
+    $success = $false
+
+    do {
+        $attempt++
+        try {
+            # Check file size
+            $fileInfo = Get-Item $FilePath
+            if ($fileInfo.Length -gt 7MB) {
+                throw "File exceeds maximum size limit of 7MB"
+            }
+
+            # Attempt upload
+            $result = Add-TicketAttachment -TicketId $TicketId -FilePath $FilePath -Headers $Headers
+            $success = $true
+            return $result
+        }
+        catch {
+            $errorMessage = $_.Exception.Message
+
+            # Handle specific error cases
+            switch -Regex ($errorMessage) {
+                'rate limit exceeded' {
+                    Write-Warning "Rate limit hit, waiting 5 minutes..."
+                    Start-Sleep -Seconds 300
+                }
+                '401|403' {
+                    throw "Authentication failed: $errorMessage"
+                }
+                default {
+                    if ($attempt -lt $MaxRetries) {
+                        Write-Warning "Attempt $attempt failed, retrying..."
+                        Start-Sleep -Seconds (2 * $attempt)
+                    }
+                    else {
+                        throw "Failed after $MaxRetries attempts: $errorMessage"
+                    }
+                }
+            }
+        }
+    } while (-not $success -and $attempt -lt $MaxRetries)
+}
+```

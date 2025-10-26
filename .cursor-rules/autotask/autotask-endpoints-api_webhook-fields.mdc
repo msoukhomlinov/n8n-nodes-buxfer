@@ -1,0 +1,99 @@
+---
+description: webhooks;fields;configuration;Configure and manage webhook field triggers and payload contents for Autotask entities
+globs: 
+alwaysApply: false
+---
+---
+description: webhooks;fields;configuration;Configure and manage webhook field triggers and payload contents for Autotask entities
+---
+
+# WebhookFields Entity
+
+## Overview
+
+The WebhookFields entity enables precise control over webhook behaviour by allowing you to specify which fields should trigger webhook calls and which fields should be included in the webhook payload. At least one callout field must be configured for create or update operations.
+
+## Entity Properties
+
+| Property    | Value             |
+|-------------|-------------------|
+| Can Create  | Yes              |
+| Can Update  | Yes              |
+| Can Query   | Yes              |
+| Can Delete  | Yes              |
+| Has UDFs    | No               |
+| Supports Pagination | Yes      |
+| Supports Sorting | Yes         |
+
+## Fields
+
+| Field Name | Data Type | Read Only | Required | Description |
+|------------|-----------|-----------|-----------|-------------|
+| fieldId | integer | Yes | Yes | Internal Autotask ID for the system field |
+| id | long | Yes | Yes | Unique identifier for the webhook field configuration |
+| isDisplayAlwaysField | boolean | No | Yes | When true, the field is always included in the payload when any configured field triggers a callout |
+| isSubscribedField | boolean | No | Yes | When true, changes to this field will trigger a webhook callout |
+| webhookId | integer | No | Yes | Internal ID of the associated webhook configuration |
+| fieldName | string | Yes | No | Display name of the field (read-only reference) |
+| entityType | string | Yes | No | Type of entity this field belongs to |
+
+## Sample description: autotask rest api,
+
+### Create Field Configuration
+```http
+POST https://webservices[n].autotask.net/atservicesrest/v1.0/CompanyWebhooks/9/Fields
+
+{
+    "fieldId": "13",
+    "isDisplayAlwaysField": true,
+    "isSubscribedField": true,
+    "webhookId": "9"
+}
+```
+
+### Query Field Configurations
+```http
+GET https://webservices[n].autotask.net/atservicesrest/v1.0/CompanyWebhooks/9/Fields
+```
+
+## Implementation Notes
+
+1. Field Configuration Strategy:
+   - Configure at least one field as a trigger (isSubscribedField: true)
+   - Set critical reference fields as Display Always (isDisplayAlwaysField: true)
+   - Balance between payload size and necessary data
+   - Consider rate limits and performance impact
+
+2. Cross-Reference Management:
+   - Set external IDs and key identifiers as Display Always fields
+   - Ensures consistent cross-system referencing
+   - Facilitates reliable data synchronisation
+
+3. Performance Considerations:
+   - Limit the number of subscribed fields to reduce unnecessary triggers
+   - Only include essential fields in the payload
+   - Consider implementing batch processing for high-volume scenarios
+
+## Error Handling
+
+Common error scenarios to handle:
+- Invalid field IDs or webhook IDs
+- Duplicate field configurations
+- Missing required fields
+- Rate limit exceeded
+- Network connectivity issues
+
+## Security Considerations
+
+1. API Access Controls:
+   - Implement proper authentication
+   - Use API keys securely
+   - Follow principle of least privilege
+   - Monitor webhook activity logs
+
+2. Data Protection:
+   - Only include necessary fields in payloads
+   - Consider data privacy requirements
+   - Implement secure webhook endpoints
+   - Use HTTPS for all communications
+   - Validate webhook source IPs if possible

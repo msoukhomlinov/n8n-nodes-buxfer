@@ -1,0 +1,143 @@
+---
+description: PATCH, Updates, Partial; Learn how to perform partial resource updates using Autotask REST API PATCH operations
+globs: 
+alwaysApply: false
+---
+---
+description: PATCH, Updates, Partial; Learn how to perform partial resource updates using Autotask REST API PATCH operations
+globs:
+---
+
+# PATCH Operations Guide
+
+## Overview
+PATCH operations allow you to update specific fields of a resource without modifying the entire object. This is particularly useful when you need to make targeted changes to large resources or want to minimise data transfer.
+
+## Basic PATCH Request
+
+### Request Format
+```http
+PATCH /ATServicesRest/V1.0/Companies/{id}
+Content-Type: application/json
+Authorization: Basic {base64_encoded_credentials}
+
+{
+    "fieldName1": "newValue1",
+    "fieldName2": "newValue2"
+}
+```
+
+### Example Request
+```http
+PATCH /ATServicesRest/V1.0/Companies/12345
+Content-Type: application/json
+Authorization: Basic {base64_encoded_credentials}
+
+{
+    "phone": "+61 2 8765 4321",
+    "website": "https://example.com"
+}
+```
+
+## Key Considerations
+
+### Field Updates
+- Only include fields that need to be modified
+- Omitted fields retain their existing values
+- Read-only fields are ignored if included
+- Null values are processed as intentional updates
+
+### Validation Rules
+1. Field-level validation remains active
+2. Business logic validation applies
+3. Required fields only needed if updating
+4. Data type validation enforced
+5. Field length limits apply
+
+### Response Handling
+- 200: Successful update
+- 400: Invalid request format
+- 404: Resource not found
+- 422: Validation error
+- Response includes updated resource
+
+## Best Practices
+
+### Error Handling
+```powershell
+try {
+    # Prepare PATCH request
+    $response = Invoke-RestMethod -Method PATCH `
+                                 -Uri "$baseUrl/Companies/$companyId" `
+                                 -Headers $headers `
+                                 -Body $updateJson
+
+    # Process successful response
+    Write-Output "Update successful: $($response.id)"
+}
+catch {
+    # Handle specific error cases
+    switch ($_.Exception.Response.StatusCode.value__) {
+        400 { Write-Error "Invalid request format" }
+        404 { Write-Error "Company not found" }
+        422 { Write-Error "Validation failed" }
+        default { Write-Error "Unexpected error: $_" }
+    }
+}
+```
+
+### Performance Optimisation
+1. Batch related updates together
+2. Minimise update frequency
+3. Include only necessary fields
+4. Consider rate limiting
+5. Implement retry logic
+
+## Security Considerations
+- Use HTTPS for all description: autotask rest api,
+- Implement proper authentication
+- Validate input data
+- Log update operations
+- Monitor for unusual patterns
+
+## Common Scenarios
+
+### Partial Updates
+```json
+{
+    "phone": "+61 2 9876 5432"
+}
+```
+
+### Multiple Field Updates
+```json
+{
+    "phone": "+61 2 9876 5432",
+    "website": "https://example.com",
+    "active": true
+}
+```
+
+### Status Updates
+```json
+{
+    "active": false,
+    "statusNotes": "Account temporarily suspended"
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+1. Missing required related fields
+2. Invalid field values
+3. Attempting to update read-only fields
+4. Incorrect data types
+5. Business rule violations
+
+### Resolution Steps
+1. Verify request format
+2. Check field requirements
+3. Validate data types
+4. Review business rules
+5. Check API logs

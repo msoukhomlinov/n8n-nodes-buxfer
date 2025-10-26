@@ -1,0 +1,203 @@
+# RESUME DEVELOPMENT ON PARTIALLY COMPLETE CODEBASE
+# Purpose: Guide the continuation of development on an existing codebase while maintaining project tracking
+# Usage: Use this prompt when resuming work on a project that has existing tracking structure
+
+# PRE-REQUISITES VERIFICATION
+1. Verify Project Tracking Structure:
+   ```yaml
+   required_files:
+     - .project-tracker/core/project.yaml
+     - .project-tracker/progress/phases.yaml
+     - .project-tracker/records/decisions/
+     - .project-tracker/notepads/*.yaml
+     - .cursorrules
+   ```
+
+2. Load Current Project State:
+   ```yaml
+   check_points:
+     tracking:
+       - Current phase in phases.yaml
+       - Active tasks and their status
+       - Recent decisions in records/decisions/
+       - Latest quality gate results
+     notepads:
+       - Project goals and standards
+       - Current context and priorities
+       - Progress and blockers
+       - Knowledge base updates
+   ```
+
+# CODEBASE FAMILIARISATION SEQUENCE
+
+1. Project Structure Analysis:
+   ```yaml
+   analysis_points:
+     documentation:
+       - Review README.md and documentation
+       - Check notepad knowledge base
+       - Review architectural decisions
+     
+     structure:
+       - Analyze directory structure
+       - Identify core components
+       - Map dependencies
+     
+     context:
+       - Review goals notepad
+       - Check current priorities
+       - Understand known issues
+   ```
+
+2. Technical Stack Verification:
+   ```yaml
+   verify:
+     stack:
+       - Language versions
+       - Framework compatibility
+       - Database connections
+       - External service integrations
+     
+     standards:
+       - Review goals notepad
+       - Check coding standards
+       - Verify testing requirements
+   ```
+
+3. Development Context:
+   ```yaml
+   assess:
+     current_state:
+       - Phase objectives from context notepad
+       - Incomplete tasks from progress notepad
+       - Known issues from context notepad
+     
+     quality:
+       - Technical debt from knowledge notepad
+       - Test coverage requirements
+       - Performance targets
+   ```
+
+# DEVELOPMENT CONTINUATION PROTOCOL
+
+1. Status Synchronisation:
+   ```yaml
+   sync_points:
+     project_status:
+       - Update phases.yaml with current progress
+       - Document new blockers in context notepad
+       - Record decisions in knowledge notepad
+     
+     code_status:
+       - Review recent commits
+       - Check branch status
+       - Verify working tree
+   ```
+
+2. Work Resumption Steps:
+   ```yaml
+   steps:
+     1. Load current phase from phases.yaml
+     2. Check context notepad for priorities
+     3. Review goals notepad for standards
+     4. Identify next pending task
+     5. Update progress tracking
+   ```
+
+3. Quality Control Integration:
+   ```yaml
+   quality_checks:
+     pre_development:
+       - Verify test environment
+       - Check standards from goals notepad
+       - Review coding guidelines
+     
+     during_development:
+       - Run automated tests
+       - Update documentation
+       - Track progress in notepads
+     
+     post_development:
+       - Run quality gate checks
+       - Update changelog
+       - Document decisions
+   ```
+
+# IMPLEMENTATION GUIDANCE
+
+1. Code Changes:
+   ```yaml
+   guidelines:
+     standards:
+       - Follow patterns from goals notepad
+       - Maintain consistent style
+       - Adhere to best practices
+     
+     documentation:
+       - Update technical docs
+       - Record decisions
+       - Maintain knowledge base
+   ```
+
+2. Progress Tracking:
+   ```yaml
+   tracking:
+     updates:
+       - Task status in phases.yaml
+       - Progress notepad
+       - Context notepad
+     
+     documentation:
+       - Technical decisions
+       - Lessons learned
+       - Quality metrics
+   ```
+
+# COMPLETION CHECKLIST
+
+1. Code Quality:
+   ```yaml
+   verify:
+     quality:
+       - Tests passing
+       - Linting clean
+       - Documentation updated
+       - Standards met (goals notepad)
+   ```
+
+2. Project Tracking:
+   ```yaml
+   confirm:
+     updates:
+       - phases.yaml current
+       - Notepads synced
+       - Decisions documented
+       - Quality gates passed
+   ```
+
+3. Handover Documentation:
+   ```yaml
+   prepare:
+     documentation:
+       - Summary of changes
+       - Status report
+       - Next steps
+       - Known issues
+     
+     notepads:
+       - Update progress tracking
+       - Record new knowledge
+       - Document context changes
+   ```
+
+This prompt ensures:
+- Seamless continuation of development
+- Maintenance of project tracking
+- Quality control adherence
+- Documentation completeness
+- Progress visibility
+- Notepad synchronisation
+
+Use in conjunction with:
+- project-01-setup-tracking-structure.prompt
+- project-02-setup-cursorrules.prompt 

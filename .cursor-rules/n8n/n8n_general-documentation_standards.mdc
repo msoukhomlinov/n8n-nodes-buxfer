@@ -1,0 +1,74 @@
+---
+description: n8n node, Standards for documenting n8n nodes, including code comments, README files, and API documentation requirements. [documentation, comments, readme, examples, usage]
+globs: 
+alwaysApply: false
+---
+---
+description: n8n node, Standards for documenting n8n nodes, including code comments, README files, and API documentation requirements. [documentation, comments, readme, examples, usage]
+globs: 
+---
+# n8n Node Documentation Standards
+
+1. Code Documentation
+   - Use JSDoc comments for classes and methods
+   - Document parameters and return types
+   - Include usage examples
+   - Example:
+   ```typescript
+   /**
+    * Creates a new ticket in Autotask
+    * @param {IExecuteFunctions} this The current execution context
+    * @param {IDataObject} ticket The ticket data
+    * @returns {Promise<IDataObject>} The created ticket
+    */
+   async function createTicket(
+     this: IExecuteFunctions,
+     ticket: IDataObject,
+   ): Promise<IDataObject> {
+     // Implementation
+   }
+   ```
+
+2. README Documentation
+   - Include installation instructions
+   - Document credentials setup
+   - Provide usage examples
+   - List supported operations
+   - Include troubleshooting guide
+
+3. Node Description
+   - Clear operation descriptions
+   - Detailed parameter descriptions
+   - Include default values
+   - Document limitations
+   - Example:
+   ```typescript
+   description: INodeTypeDescription = {
+     displayName: 'Autotask Ticket',
+     name: 'autotaskTicket',
+     group: ['transform'],
+     version: 1,
+     description: 'Create and manage Autotask tickets',
+     defaults: {
+       name: 'Autotask Ticket',
+     },
+     // ... more properties
+   };
+   ```
+
+4. Error Documentation
+   - Document common errors
+   - Include error handling examples
+   - Provide troubleshooting steps
+   - List error codes and meanings
+
+5. Version Documentation
+   - Document version changes
+   - Include upgrade guides
+   - List breaking changes
+   - Document deprecations
+
+## Dependencies
+[n8n-build-node_implementation.mdc](mdc:.cursor/rules/n8n-build-node_implementation.mdc)
+[n8n_general-naming_conventions.mdc](mdc:.cursor/rules/n8n_general-naming_conventions.mdc)
+

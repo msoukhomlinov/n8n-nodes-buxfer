@@ -1,0 +1,116 @@
+Analyze or implement n8n Tournament Templating Engine features following these guidelines:
+
+Tournament Engine Overview:
+1. Introduction:
+   - Available from n8n v1.9.0+
+   - Provides built-in data transformation functions
+   - Enables chainable operations
+   - Supports type-specific transformations
+   - Integrates with inline expressions
+
+2. Key Features:
+   - Type-aware transformations
+   - Method chaining support
+   - Built-in validation functions
+   - Data type conversions
+   - Integrated with n8n variables
+
+3. Data Type Support:
+   - String transformations
+   - Array operations
+   - Number formatting
+   - Object manipulations
+   - Date/time handling (Luxon)
+   - Boolean operations
+
+4. Expression Context:
+   - Access to node data
+   - Workflow variables
+   - Execution metadata
+   - Binary data handling
+   - Cross-node references
+
+5. Integration Points:
+   - Node parameters
+   - Dynamic values
+   - Conditional logic
+   - Data mapping
+   - Field calculations
+
+6. Best Practices:
+   - Use appropriate data types
+   - Chain operations efficiently
+   - Handle type conversions
+   - Validate data appropriately
+   - Consider performance impact
+
+7. Method Combinations:
+   - Mix built-in and standard JS methods
+   - Chain multiple transformations
+   - Combine different data types
+   - Use type conversion methods
+   - Leverage intermediate results
+
+Example Usage Patterns:
+1. Basic Transformations:
+   {{ "test@email.com".isEmail() }}
+   {{ [1,2,3].sum() }}
+
+2. Chained Operations:
+   {{ "Hello World".toLowerCase().split(" ").join("-") }}
+   {{ $json.numbers.removeDuplicates().sum() }}
+
+3. Type Conversions:
+   {{ 123.toBoolean() }}
+   {{ "2023-01-01".toDateTime() }}
+
+4. Complex Transformations:
+   {{ $json.url.extractDomain().split(".").first() }}
+   {{ $("PreviousNode").item.json.data.removeDuplicates().merge($json.newData) }}
+
+5. Date Operations:
+   {{ $now.minus({ days: 7 }).format("yyyy-MM-dd") }}
+   {{ $json.date.toDateTime().plus({ months: 1 }).isWeekend() }}
+
+6. Combined Methods Examples:
+   - String + Array:
+     {{ "a,b,c".split(",").removeDuplicates().join("-") }}
+   
+   - URL + String:
+     {{ "https://example.com/path".extractDomain().toUpperCase() }}
+   
+   - Array + Number:
+     {{ $json.numbers.removeDuplicates().sum().round(2) }}
+   
+   - Date + String:
+     {{ $now.format("yyyy-MM-dd").split("-").reverse().join("/") }}
+   
+   - Object + Array:
+     {{ $json.data.toJsonString().split(",").first() }}
+
+Common Use Cases:
+1. Data Validation:
+   - Email validation
+   - URL processing
+   - Number formatting
+   - Date calculations
+
+2. Data Transformation:
+   - String manipulation
+   - Array processing
+   - Object restructuring
+   - Type conversion
+
+3. Conditional Logic:
+   - Value checking
+   - Type validation
+   - Null handling
+   - Default values
+
+4. Data Aggregation:
+   - Array operations
+   - Numeric calculations
+   - String concatenation
+   - Object merging
+
+The Tournament Engine implementation should: 

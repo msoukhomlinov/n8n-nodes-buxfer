@@ -1,0 +1,86 @@
+---
+description: REST queries, filtering, pagination;Learn how to construct and execute basic REST API queries for Autotask resources
+globs: 
+alwaysApply: false
+---
+---
+description: REST queries, filtering, pagination;Learn how to construct and execute basic REST API queries for Autotask resources
+globs:
+---
+
+# Basic Query Operations
+
+## Overview
+The Autotask REST API supports querying resources through GET and POST description: autotask rest api, using:
+- Entity ID lookups
+- Filter expressions
+- Comparison operators
+- Logical grouping (AND/OR)
+
+## Key Concepts
+
+### Query Response Structure
+All query responses follow this standard format:
+```json
+{
+    "items": [
+        {
+            "FieldName1": "FieldData",
+            "FieldName2": "FieldData",
+            "userDefinedFields": [
+                {"name": "UDF1", "value": "Data"},
+                {"name": "UDF2", "value": "Data"}
+            ]
+        }
+    ],
+    "pageDetails": {
+        "count": 0,
+        "requestCount": 500,
+        "prevPageUrl": null,
+        "nextPageUrl": null
+    }
+}
+```
+
+### Important Limitations
+- Boolean values must be specified as `true` or `false` only
+- GET query strings limited to 2048 characters
+- Maximum 500 OR conditions per query
+- User Defined Fields (UDFs):
+  - Limited to one UDF per query for VB entities
+  - Maximum 5 unique UDFs per query for C# entities
+  - Case-sensitive when querying protected UDFs
+
+## Basic Query Methods
+
+### GET by ID
+Retrieve a single entity by its unique identifier:
+```
+GET https://webservices[n].autotask.net/atservicesrest/v1.0/Companies/{id}
+```
+
+### GET with Filter
+Query multiple entities using filter criteria:
+```
+GET https://webservices[n].autotask.net/atservicesrest/v1.0/Companies/query?search={"filter":[{"op":"eq","field":"isActive","value":true}]}
+```
+
+### POST Query
+For complex queries exceeding GET limitations:
+```
+POST https://webservices[n].autotask.net/atservicesrest/v1.0/Companies/query
+{
+    "filter": [
+        {
+            "op": "eq",
+            "field": "isActive",
+            "value": true
+        }
+    ]
+}
+```
+
+See related files:
+[autotask-endpoints-api_filter-operators.mdc](mdc:.cursor/rules/autotask-endpoints-api_filter-operators.mdc)
+[autotask-endpoints-api_udf-queries.mdc](mdc:.cursor/rules/autotask-endpoints-api_udf-queries.mdc)
+[autotask-endpoints-api_query-grouping.mdc](mdc:.cursor/rules/autotask-endpoints-api_query-grouping.mdc)
