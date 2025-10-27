@@ -1,0 +1,31 @@
+# Source files
+src/
+credentials/
+nodes/
+
+# Development files
+.eslintrc.js
+.prettierrc
+tsconfig.json
+
+# Development dependencies and scripts
+node_modules/
+package-lock.json
+
+# Documentation and development files
+README.md
+CHANGELOG.md
+CONTRIBUTING.md
+LICENSE
+
+# Test files
+**/*.test.ts
+**/*.spec.ts
+
+# IDE files
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db

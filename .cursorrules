@@ -219,5 +219,35 @@ Located in `/.cursor-rules`.
 - Prefer 429 status for rate limit detection; avoid brittle message matching.
 - Keep Autotask REST URLs consistent without trailing slashes.
 - Attachment content endpoints use `/data` and require both parent entity ID and attachment ID.
+- Buxfer API requires form-encoded data (`application/x-www-form-urlencoded`) for login and POST requests, not JSON.
+- Buxfer API uses token as query parameter (`?token=xxx`), not Authorization header.
+- Buxfer API uses command-style endpoints (`/transaction_add`, `/transaction_edit`, `/transaction_delete`) not REST-style.
+- Use simple console.log debug function with DEBUG_ENABLED flag instead of misusing context.logger.error() for debug messages.
+- Always sort picklist options alphabetically using `localeCompare()` for proper international sorting support.
+- For client-side filtering with pagination, apply filters within the pagination loop to ensure proper result counting and limit handling.
 
 # Scratchpad
+
+## Current Task: Amount Filter Enhancement
+[X] Add amountFilter and amountComparison field definitions to transactionDescription.ts
+[X] Create filterTransactionsByAmount function in transactionFunctions.ts
+[X] Export filterTransactionsByAmount from functions/index.ts
+[X] Import filterTransactionsByAmount in Buxfer.node.ts
+[X] Integrate amount filtering in the Return All branch of getMany operation
+[X] Integrate amount filtering in the pagination with filters branch
+[X] Integrate amount filtering in the no-filter branch
+
+## Task Completed Successfully ✅
+
+The transaction "Get Many" operation has been enhanced with client-side amount filtering:
+- Added two new UI fields: Amount Filter (number) and Amount Comparison (equal/above/below)
+- Amount Comparison field only shows when Amount Filter has a value
+- Created `filterTransactionsByAmount` function that handles equal, above (>=), and below (<=) comparisons
+- Integrated amount filtering into all three branches of the getMany operation:
+  - Return All: Applies filters after fetching all pages
+  - Pagination with filters: Applies both keyword and amount filters during pagination
+  - No filters: Applies amount filter after single page fetch
+- Filter chaining: keyword filter applies first, then amount filter
+- Works seamlessly with existing pagination logic
+- No linting errors introduced
+- Uses actual signed transaction amounts (negative for expenses, positive for income)
