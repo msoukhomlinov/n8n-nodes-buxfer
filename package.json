@@ -1,0 +1,57 @@
+{
+  "name": "n8n-nodes-buxfer",
+  "version": "0.1.0",
+  "description": "n8n community node for Buxfer personal finance API",
+  "keywords": [
+    "n8n-community-node-package",
+    "buxfer",
+    "finance",
+    "personal finance"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/yourusername/n8n-nodes-buxfer#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/n8n-nodes-buxfer.git"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "npm run clean && tsc && npm run copy-icons",
+    "clean": "rimraf dist",
+    "copy-icons": "copyfiles -u 1 \"nodes/**/*.{png,svg}\" dist/nodes/",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes credentials",
+    "lintfix": "eslint nodes credentials --fix",
+    "prepublishOnly": "npm run build && npm run lint"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/BuxferApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/buxfer/Buxfer.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/flat-cache": "^2.0.2",
+    "@types/node": "^24.9.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.0.0",
+    "copyfiles": "^2.4.1",
+    "eslint": "^8.57.0",
+    "prettier": "^3.6.2",
+    "rimraf": "^6.0.0",
+    "typescript": "^5.9.2"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "dependencies": {
+    "flat-cache": "^6.1.18"
+  }
+}
