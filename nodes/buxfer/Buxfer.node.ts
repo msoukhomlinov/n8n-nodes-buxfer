@@ -225,8 +225,23 @@ export class Buxfer implements INodeType {
               const tagId = this.getNodeParameter('tagId', i) as string;
               const status = this.getNodeParameter('status', i) as string[];
               const keyword = this.getNodeParameter('keyword', i) as string;
-              const amountFilter = this.getNodeParameter('amountFilter', i) as number | undefined;
-              const amountComparison = this.getNodeParameter('amountComparison', i) as string || 'equal';
+              let amountFilter: number | undefined;
+              try {
+                const raw = this.getNodeParameter('amountFilter', i);
+                if (raw === '' || raw === undefined || raw === null) {
+                  amountFilter = undefined;
+                } else {
+                  amountFilter = raw as number;
+                }
+              } catch {
+                amountFilter = undefined;
+              }
+              let amountComparison: string;
+              try {
+                amountComparison = this.getNodeParameter('amountComparison', i) as string || 'equal';
+              } catch {
+                amountComparison = 'equal';
+              }
               const returnAll = this.getNodeParameter('returnAll', i) as boolean;
               let limit: number | undefined;
               if (!returnAll) {

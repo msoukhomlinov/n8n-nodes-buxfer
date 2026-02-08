@@ -2,6 +2,11 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## [0.2.0] - 2026-02-08
+
+### Fixed
+- **Transaction Get Many**: Optional Amount filter no longer throws "Could not get parameter" when left empty. Amount filter and Amount comparison are read safely so the node runs without requiring these fields.
+
 ## [0.1.0] - 2025-10-27
 
 ### Added
