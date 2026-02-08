@@ -2,6 +2,11 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## [0.4.0] - 2026-02-08
+
+### Fixed
+- **Transaction Create/Update – tags**: Tags are now sent to the Buxfer API as comma-separated **tag names** instead of tag IDs. This prevents Buxfer from creating new tags with numeric "names" when updating or creating transactions with tags.
+
 ## [0.3.0] - 2026-02-08
 
 ### Changed

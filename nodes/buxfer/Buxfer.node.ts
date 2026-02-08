@@ -23,6 +23,7 @@ import {
   calculateDateRange,
   filterTransactionsByKeyword,
   filterTransactionsByAmount,
+  resolveTagIdsToNames,
 } from './functions';
 
 // Helper function to format dates to YYYY-MM-DD for Buxfer API
@@ -358,8 +359,10 @@ export class Buxfer implements INodeType {
               };
 
               const additionalFields = (this.getNodeParameter('additionalFields', i) as Record<string, unknown>) || {};
-              const tags = additionalFields.tags as string[] | undefined;
-              if (tags && tags.length > 0) data.tags = tags.join(',');
+              const tagIds = additionalFields.tags as string[] | undefined;
+              if (tagIds && tagIds.length > 0) {
+                data.tags = await resolveTagIdsToNames(this, tagIds);
+              }
 
               const transactionType = data.type;
               if (transactionType === 'sharedBill') {
@@ -399,8 +402,10 @@ export class Buxfer implements INodeType {
               if (fieldsToUpdate.type !== undefined) data.type = fieldsToUpdate.type;
               if (fieldsToUpdate.status !== undefined) data.status = fieldsToUpdate.status;
 
-              const tags = fieldsToUpdate.tags as string[] | undefined;
-              if (tags && tags.length > 0) data.tags = tags.join(',');
+              const tagIds = fieldsToUpdate.tags as string[] | undefined;
+              if (tagIds && tagIds.length > 0) {
+                data.tags = await resolveTagIdsToNames(this, tagIds);
+              }
 
               const transactionType = data.type;
               if (transactionType === 'sharedBill') {

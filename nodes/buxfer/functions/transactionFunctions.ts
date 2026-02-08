@@ -1,5 +1,6 @@
 import type { IExecuteFunctions } from 'n8n-workflow';
 import { buxferApiRequest } from '../api.js';
+import { getTags } from './tagFunctions.js';
 
 export function filterTransactionsByKeyword(transactions: any[], keyword: string): any[] {
   if (!keyword || keyword.trim() === '') {
@@ -134,6 +135,20 @@ export function calculateDateRange(preset: string): { startDate: string; endDate
       return { startDate: '', endDate: '' }; // Fallback to no filtering
     }
   }
+}
+
+/** Resolve tag IDs to comma-separated names for Buxfer API (transaction_add/transaction_edit expect tag names). */
+export async function resolveTagIdsToNames(
+  context: IExecuteFunctions,
+  tagIds: string[]
+): Promise<string> {
+  if (!tagIds.length) return '';
+  const tags = await getTags(context);
+  const idToName = Object.fromEntries(
+    tags.map((t: { id: string | number; name?: string }) => [String(t.id), t.name ?? String(t.id)])
+  );
+  const names = tagIds.map((id) => idToName[String(id)]).filter(Boolean);
+  return names.join(',');
 }
 
 export async function getTransactions(context: IExecuteFunctions, filters: any = {}): Promise<any[]> {

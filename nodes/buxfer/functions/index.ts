@@ -7,6 +7,7 @@ export {
   calculateDateRange,
   filterTransactionsByKeyword,
   filterTransactionsByAmount,
+  resolveTagIdsToNames,
 } from './transactionFunctions';
 
 // Account functions
