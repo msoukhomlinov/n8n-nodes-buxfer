@@ -25,6 +25,17 @@ import {
   filterTransactionsByAmount,
 } from './functions';
 
+// Helper function to format dates to YYYY-MM-DD for Buxfer API
+function formatDateForBuxfer(dateValue: string | undefined): string | undefined {
+  if (!dateValue) return undefined;
+  // If already in YYYY-MM-DD format, return as-is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) return dateValue;
+  // Parse ISO date and extract YYYY-MM-DD
+  const date = new Date(dateValue);
+  if (isNaN(date.getTime())) return undefined;
+  return date.toISOString().split('T')[0];
+}
+
 import { transactionFields } from './descriptions/transactionDescription';
 import { accountFields } from './descriptions/accountDescription';
 import { tagFields } from './descriptions/tagDescription';
@@ -219,43 +230,25 @@ export class Buxfer implements INodeType {
           // Handle transaction operations
           switch (operation) {
             case 'getMany': {
-              const filters: any = {};
-              const dateRange = this.getNodeParameter('dateRange', i) as string;
-              const accountId = this.getNodeParameter('accountId', i) as string;
-              const tagId = this.getNodeParameter('tagId', i) as string;
-              const status = this.getNodeParameter('status', i) as string[];
-              const keyword = this.getNodeParameter('keyword', i) as string;
-              let amountFilter: number | undefined;
-              try {
-                const raw = this.getNodeParameter('amountFilter', i);
-                if (raw === '' || raw === undefined || raw === null) {
-                  amountFilter = undefined;
-                } else {
-                  amountFilter = raw as number;
-                }
-              } catch {
-                amountFilter = undefined;
-              }
-              let amountComparison: string;
-              try {
-                amountComparison = this.getNodeParameter('amountComparison', i) as string || 'equal';
-              } catch {
-                amountComparison = 'equal';
-              }
-              const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-              let limit: number | undefined;
-              if (!returnAll) {
-                try {
-                  limit = this.getNodeParameter('limit', i) as number;
-                } catch {
-                  limit = 100; // Default fallback
-                }
-              }
+              const filtersParam = (this.getNodeParameter('filters', i) as Record<string, unknown>) || {};
+              const dateRange = (filtersParam.dateRange as string) ?? 'allTime';
+              const accountId = filtersParam.accountId as string | undefined;
+              const tagId = filtersParam.tagId as string | undefined;
+              const status = (filtersParam.status as string[]) ?? [];
+              const keyword = (filtersParam.keyword as string) ?? '';
+              const rawAmount = filtersParam.amountFilter;
+              const amountFilter: number | undefined =
+                rawAmount === '' || rawAmount === undefined || rawAmount === null
+                  ? undefined
+                  : (rawAmount as number);
+              const amountComparison = (filtersParam.amountComparison as string) ?? 'equal';
+              const returnAll = (filtersParam.returnAll as boolean) ?? false;
+              const limit = returnAll ? undefined : ((filtersParam.limit as number) ?? 100);
 
-              // Handle date range filtering
+              const filters: any = {};
               if (dateRange === 'custom') {
-                const startDate = this.getNodeParameter('startDate', i) as string;
-                const endDate = this.getNodeParameter('endDate', i) as string;
+                const startDate = formatDateForBuxfer(filtersParam.startDate as string | undefined);
+                const endDate = formatDateForBuxfer(filtersParam.endDate as string | undefined);
                 if (startDate) filters.startDate = startDate;
                 if (endDate) filters.endDate = endDate;
               } else {
@@ -358,35 +351,32 @@ export class Buxfer implements INodeType {
               const data: any = {
                 description: this.getNodeParameter('description', i) as string,
                 amount: this.getNodeParameter('amount', i) as number,
-                date: this.getNodeParameter('date', i) as string,
+                date: formatDateForBuxfer(this.getNodeParameter('date', i) as string) || '',
                 accountId: this.getNodeParameter('accountId', i) as string,
                 type: this.getNodeParameter('type', i) as string,
                 status: this.getNodeParameter('status', i) as string,
               };
 
-              const tags = this.getNodeParameter('tags', i) as string[];
+              const additionalFields = (this.getNodeParameter('additionalFields', i) as Record<string, unknown>) || {};
+              const tags = additionalFields.tags as string[] | undefined;
               if (tags && tags.length > 0) data.tags = tags.join(',');
 
-              // Handle special transaction types
               const transactionType = data.type;
               if (transactionType === 'sharedBill') {
-                const payers = this.getNodeParameter('payers', i) as any;
-                const sharers = this.getNodeParameter('sharers', i) as any;
-                const isEvenSplit = this.getNodeParameter('isEvenSplit', i) as boolean;
-
-                if (payers && payers.payer) data.payers = payers.payer;
-                if (sharers && sharers.sharer) data.sharers = sharers.sharer;
-                data.isEvenSplit = isEvenSplit;
+                const payers = additionalFields.payers as { payer?: unknown[] } | undefined;
+                const sharers = additionalFields.sharers as { sharer?: unknown[] } | undefined;
+                const isEvenSplit = additionalFields.isEvenSplit as boolean | undefined;
+                if (payers?.payer) data.payers = payers.payer;
+                if (sharers?.sharer) data.sharers = sharers.sharer;
+                if (isEvenSplit !== undefined) data.isEvenSplit = isEvenSplit;
               } else if (transactionType === 'loan') {
-                const loanedBy = this.getNodeParameter('loanedBy', i) as string;
-                const borrowedBy = this.getNodeParameter('borrowedBy', i) as string;
-
+                const loanedBy = additionalFields.loanedBy as string | undefined;
+                const borrowedBy = additionalFields.borrowedBy as string | undefined;
                 if (loanedBy) data.loanedBy = loanedBy;
                 if (borrowedBy) data.borrowedBy = borrowedBy;
               } else if (transactionType === 'paidForFriend') {
-                const paidBy = this.getNodeParameter('paidBy', i) as string;
-                const paidFor = this.getNodeParameter('paidFor', i) as string;
-
+                const paidBy = additionalFields.paidBy as string | undefined;
+                const paidFor = additionalFields.paidFor as string | undefined;
                 if (paidBy) data.paidBy = paidBy;
                 if (paidFor) data.paidFor = paidFor;
               }
@@ -396,39 +386,38 @@ export class Buxfer implements INodeType {
             }
 
             case 'update': {
-              const data: any = {
-                id: this.getNodeParameter('transactionId', i) as string,
-                description: this.getNodeParameter('description', i) as string,
-                amount: this.getNodeParameter('amount', i) as number,
-                date: this.getNodeParameter('date', i) as string,
-                accountId: this.getNodeParameter('accountId', i) as string,
-                type: this.getNodeParameter('type', i) as string,
-                status: this.getNodeParameter('status', i) as string,
-              };
+              const transactionId = this.getNodeParameter('transactionId', i) as string;
+              const fieldsToUpdate = (this.getNodeParameter('fieldsToUpdate', i) as Record<string, unknown>) || {};
+              const data: any = { id: transactionId };
 
-              const tags = this.getNodeParameter('tags', i) as string[];
+              if (fieldsToUpdate.description !== undefined) data.description = fieldsToUpdate.description;
+              if (fieldsToUpdate.amount !== undefined) data.amount = fieldsToUpdate.amount;
+              if (fieldsToUpdate.date !== undefined) {
+                data.date = formatDateForBuxfer(fieldsToUpdate.date as string);
+              }
+              if (fieldsToUpdate.accountId !== undefined) data.accountId = fieldsToUpdate.accountId;
+              if (fieldsToUpdate.type !== undefined) data.type = fieldsToUpdate.type;
+              if (fieldsToUpdate.status !== undefined) data.status = fieldsToUpdate.status;
+
+              const tags = fieldsToUpdate.tags as string[] | undefined;
               if (tags && tags.length > 0) data.tags = tags.join(',');
 
-              // Handle special transaction types (same as create)
               const transactionType = data.type;
               if (transactionType === 'sharedBill') {
-                const payers = this.getNodeParameter('payers', i) as any;
-                const sharers = this.getNodeParameter('sharers', i) as any;
-                const isEvenSplit = this.getNodeParameter('isEvenSplit', i) as boolean;
-
-                if (payers && payers.payer) data.payers = payers.payer;
-                if (sharers && sharers.sharer) data.sharers = sharers.sharer;
-                data.isEvenSplit = isEvenSplit;
+                const payers = fieldsToUpdate.payers as { payer?: unknown[] } | undefined;
+                const sharers = fieldsToUpdate.sharers as { sharer?: unknown[] } | undefined;
+                const isEvenSplit = fieldsToUpdate.isEvenSplit as boolean | undefined;
+                if (payers?.payer) data.payers = payers.payer;
+                if (sharers?.sharer) data.sharers = sharers.sharer;
+                if (isEvenSplit !== undefined) data.isEvenSplit = isEvenSplit;
               } else if (transactionType === 'loan') {
-                const loanedBy = this.getNodeParameter('loanedBy', i) as string;
-                const borrowedBy = this.getNodeParameter('borrowedBy', i) as string;
-
+                const loanedBy = fieldsToUpdate.loanedBy as string | undefined;
+                const borrowedBy = fieldsToUpdate.borrowedBy as string | undefined;
                 if (loanedBy) data.loanedBy = loanedBy;
                 if (borrowedBy) data.borrowedBy = borrowedBy;
               } else if (transactionType === 'paidForFriend') {
-                const paidBy = this.getNodeParameter('paidBy', i) as string;
-                const paidFor = this.getNodeParameter('paidFor', i) as string;
-
+                const paidBy = fieldsToUpdate.paidBy as string | undefined;
+                const paidFor = fieldsToUpdate.paidFor as string | undefined;
                 if (paidBy) data.paidBy = paidBy;
                 if (paidFor) data.paidFor = paidFor;
               }

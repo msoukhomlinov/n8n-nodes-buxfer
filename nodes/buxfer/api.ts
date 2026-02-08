@@ -133,16 +133,16 @@ export async function buxferApiRequest(
 
       if (data) {
         const params = new URLSearchParams();
-        Object.entries(data).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            // Special handling for JSON arrays (payers, sharers)
-            if (typeof value === 'object' && !Array.isArray(value)) {
-              params.append(key, JSON.stringify(value));
-            } else {
-              params.append(key, String(value));
+          Object.entries(data).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              // Special handling for JSON objects and arrays (payers, sharers)
+              if (typeof value === 'object') {
+                params.append(key, JSON.stringify(value));
+              } else {
+                params.append(key, String(value));
+              }
             }
-          }
-        });
+          });
         config.data = params.toString();
         debug('POST request data', {
           dataLength: config.data.length,

@@ -2,6 +2,18 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## [0.3.0] - 2026-02-08
+
+### Changed
+- **Transaction – optional inputs**: Filters and optional fields are now in collapsible sections so the UI stays minimal by default.
+  - **Get Many**: All filters (date range, account, tag, status, keyword, amount, return all, limit) are in an optional **Filters** collection.
+  - **Create**: Only required fields (description, amount, date, account ID, type, status) are shown; tags and type-specific fields (payers, sharers, loan, paid-for-friend) are in **Additional Fields**.
+  - **Update**: Only **Transaction ID** is required; all editable fields are in **Fields to Update** for explicit partial updates.
+
+### Fixed
+- **API**: POST body now correctly JSON-stringifies array parameters (e.g. payers, sharers) when sending to the Buxfer API.
+- **Transaction dates**: All date parameters (Get Many custom range, Create date, Update date) are now formatted as YYYY-MM-DD for the Buxfer API.
+
 ## [0.2.0] - 2026-02-08
 
 ### Fixed
