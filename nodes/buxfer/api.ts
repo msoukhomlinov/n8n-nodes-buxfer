@@ -8,8 +8,10 @@ const DEBUG_ENABLED = true;
 function debug(message: string, data?: any): void {
   if (DEBUG_ENABLED) {
     if (data !== undefined) {
+      // eslint-disable-next-line no-console
       console.log(`[Buxfer Debug] ${message}`, data);
     } else {
+      // eslint-disable-next-line no-console
       console.log(`[Buxfer Debug] ${message}`);
     }
   }

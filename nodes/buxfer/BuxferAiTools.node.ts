@@ -228,6 +228,7 @@ export class BuxferAiTools implements INodeType {
 				}
 
 				// Strip operation from params before passing to executor
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const { operation: _op, ...rest } = params;
 				return executeAiTool(context, resource, operation, rest);
 			},
