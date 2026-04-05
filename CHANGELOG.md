@@ -2,6 +2,15 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## [0.5.0] - 2026-04-05
+
+### Added
+- **AI Tools node**: New `Buxfer AI Tools` node exposes all 8 resources (Account, Budget, Contact, Group, Loan, Reminder, Tag, Transaction) as AI Agent / MCP tools
+- **Transaction CRUD via AI**: Full create, update, delete support with write-safety toggle
+- **Discovery helpers**: `buxfer_listAccounts` and `buxfer_listTags` tools for LLM-driven value discovery
+- **Structured envelopes**: All tool responses use versioned success/error envelopes for reliable LLM parsing
+- **Dual-path dispatch**: Supports both Agent V3 (execute) and Agent V2/MCP (supplyData) paths
+
 ## [0.4.0] - 2026-02-08
 
 ### Fixed

@@ -1,4 +1,4 @@
-import type { IExecuteFunctions, ILoadOptionsFunctions } from 'n8n-workflow';
+import type { IExecuteFunctions, ILoadOptionsFunctions, ISupplyDataFunctions } from 'n8n-workflow';
 import { NodeOperationError, NodeApiError } from 'n8n-workflow';
 import axios, { AxiosResponse } from 'axios';
 
@@ -24,7 +24,7 @@ interface BuxferLoginResponse {
   };
 }
 
-export async function buxferApiLogin(context: IExecuteFunctions | ILoadOptionsFunctions, email: string, password: string): Promise<string> {
+export async function buxferApiLogin(context: IExecuteFunctions | ILoadOptionsFunctions | ISupplyDataFunctions, email: string, password: string): Promise<string> {
   try {
     const params = new URLSearchParams();
     params.append('email', email);
@@ -74,7 +74,7 @@ export async function buxferApiLogin(context: IExecuteFunctions | ILoadOptionsFu
   }
 }
 
-export async function getValidToken(context: IExecuteFunctions | ILoadOptionsFunctions): Promise<string> {
+export async function getValidToken(context: IExecuteFunctions | ILoadOptionsFunctions | ISupplyDataFunctions): Promise<string> {
   if (tokenCache && tokenExpiry && Date.now() < tokenExpiry) {
     debug('Using cached token', {
       expiresInMinutes: Math.round((tokenExpiry - Date.now()) / 1000 / 60)
@@ -91,7 +91,7 @@ export async function getValidToken(context: IExecuteFunctions | ILoadOptionsFun
 }
 
 export async function buxferApiRequest(
-  context: IExecuteFunctions | ILoadOptionsFunctions,
+  context: IExecuteFunctions | ILoadOptionsFunctions | ISupplyDataFunctions,
   method: 'GET' | 'POST',
   endpoint: string,
   data?: any

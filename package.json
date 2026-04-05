@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-buxfer",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "n8n community node for Buxfer personal finance API",
   "keywords": [
     "n8n-community-node-package",
@@ -34,7 +34,8 @@
       "dist/credentials/BuxferApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/buxfer/Buxfer.node.js"
+      "dist/nodes/buxfer/Buxfer.node.js",
+      "dist/nodes/buxfer/BuxferAiTools.node.js"
     ]
   },
   "devDependencies": {
@@ -52,6 +53,8 @@
     "n8n-workflow": "*"
   },
   "dependencies": {
-    "flat-cache": "^6.1.18"
+    "@langchain/core": ">=0.3.0",
+    "flat-cache": "^6.1.18",
+    "zod": "^3.24.0"
   }
 }
