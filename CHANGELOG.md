@@ -2,6 +2,16 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## [0.5.2] - 2026-04-06
+
+### Fixed
+- **AI Tools – Operations field for all resources**: Non-transaction resources (Account, Budget, Contact, Group, Loan, Reminder, Tag) now show an Operations field in the node UI, making it visible that `getAll` is the exposed operation. Previously no Operations field appeared for these resources.
+
+## [0.5.1] - 2026-04-06
+
+### Fixed
+- **AI Tools – Allow Write Operations toggle**: Toggle now has visible effect in the UI. The Operations field is hidden when write operations are disabled (defaulting to getAll only) and shown with all operations when enabled. Previously, the toggle only filtered at runtime but had no visible UI impact.
+
 ## [0.5.0] - 2026-04-05
 
 ### Added

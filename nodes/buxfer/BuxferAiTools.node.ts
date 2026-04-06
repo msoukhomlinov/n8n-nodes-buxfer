@@ -111,6 +111,35 @@ export class BuxferAiTools implements INodeType {
 				default: 'transaction',
 			},
 			{
+				displayName: 'Allow Write Operations',
+				name: 'allowWriteOperations',
+				type: 'boolean',
+				default: false,
+				description:
+					'Whether to allow create, update, and delete operations. When disabled, only getAll is available.',
+				displayOptions: {
+					show: {
+						resource: ['transaction'],
+					},
+				},
+			},
+			{
+				displayName: 'Operations',
+				name: 'operations',
+				type: 'multiOptions',
+				description: 'Which operations to expose to the AI agent',
+				noDataExpression: true,
+				options: [
+					{ name: 'Get All', value: 'getAll' },
+				],
+				default: ['getAll'],
+				displayOptions: {
+					show: {
+						resource: ['account', 'budget', 'contact', 'group', 'loan', 'reminder', 'tag'],
+					},
+				},
+			},
+			{
 				displayName: 'Operations',
 				name: 'operations',
 				type: 'multiOptions',
@@ -122,23 +151,11 @@ export class BuxferAiTools implements INodeType {
 					{ name: 'Update', value: 'update' },
 					{ name: 'Delete', value: 'delete' },
 				],
-				default: ['getAll'],
+				default: ['getAll', 'create', 'update', 'delete'],
 				displayOptions: {
 					show: {
 						resource: ['transaction'],
-					},
-				},
-			},
-			{
-				displayName: 'Allow Write Operations',
-				name: 'allowWriteOperations',
-				type: 'boolean',
-				default: false,
-				description:
-					'Whether to allow create, update, and delete operations. When disabled, only read operations are available.',
-				displayOptions: {
-					show: {
-						resource: ['transaction'],
+						allowWriteOperations: [true],
 					},
 				},
 			},
@@ -158,19 +175,19 @@ export class BuxferAiTools implements INodeType {
 			);
 		}
 
-		// Determine effective operations
-		let selectedOps: string[];
-		if (resource === 'transaction') {
-			selectedOps = this.getNodeParameter('operations', 0) as string[];
-		} else {
-			selectedOps = config.ops;
-		}
-
 		// Layer 1: Filter write operations if not allowed
 		const allowWriteOperations =
 			resource === 'transaction'
 				? (this.getNodeParameter('allowWriteOperations', 0, false) as boolean)
 				: false;
+
+		// When write ops are disabled for transaction, the Operations field is hidden —
+		// n8n returns its default which includes write ops. Short-circuit to avoid
+		// relying solely on effectiveOps filtering to make selectedOps semantically correct.
+		const selectedOps =
+			resource === 'transaction' && !allowWriteOperations
+				? ['getAll']
+				: (this.getNodeParameter('operations', 0) as string[]);
 
 		const effectiveOps = allowWriteOperations
 			? selectedOps
@@ -296,20 +313,17 @@ export class BuxferAiTools implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const resource = this.getNodeParameter('resource', 0) as string;
-		const config = RESOURCE_OPERATIONS[resource];
 
 		// Determine effective operations (same logic as supplyData)
-		let selectedOps: string[];
-		if (resource === 'transaction') {
-			selectedOps = this.getNodeParameter('operations', 0) as string[];
-		} else {
-			selectedOps = config?.ops ?? ['getAll'];
-		}
-
 		const allowWriteOperations =
 			resource === 'transaction'
 				? (this.getNodeParameter('allowWriteOperations', 0, false) as boolean)
 				: false;
+
+		const selectedOps =
+			resource === 'transaction' && !allowWriteOperations
+				? ['getAll']
+				: (this.getNodeParameter('operations', 0) as string[]);
 
 		const effectiveOps = allowWriteOperations
 			? selectedOps
