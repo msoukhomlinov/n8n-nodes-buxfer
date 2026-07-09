@@ -228,26 +228,12 @@ Located in `/.cursor-rules`.
 
 # Scratchpad
 
-## Current Task: Amount Filter Enhancement
-[X] Add amountFilter and amountComparison field definitions to transactionDescription.ts
-[X] Create filterTransactionsByAmount function in transactionFunctions.ts
-[X] Export filterTransactionsByAmount from functions/index.ts
-[X] Import filterTransactionsByAmount in Buxfer.node.ts
-[X] Integrate amount filtering in the Return All branch of getMany operation
-[X] Integrate amount filtering in the pagination with filters branch
-[X] Integrate amount filtering in the no-filter branch
+## Current Task: Issue #9 — AI Tools runtime resolution (pnpm-isolated n8n)
+[X] Rewrite runtime.ts with lazy requireFromCachedTree resolver (hudu#30 pattern)
+[X] Move @langchain/core to optional peer + devDependency; bump 0.5.3
+[X] CHANGELOG entry
+[X] Build + lint verified
+[X] PR #10 opened (closes #9)
+[X] QA review — all 7 acceptance criteria PASS, merge-ready
 
 ## Task Completed Successfully ✅
-
-The transaction "Get Many" operation has been enhanced with client-side amount filtering:
-- Added two new UI fields: Amount Filter (number) and Amount Comparison (equal/above/below)
-- Amount Comparison field only shows when Amount Filter has a value
-- Created `filterTransactionsByAmount` function that handles equal, above (>=), and below (<=) comparisons
-- Integrated amount filtering into all three branches of the getMany operation:
-  - Return All: Applies filters after fetching all pages
-  - Pagination with filters: Applies both keyword and amount filters during pagination
-  - No filters: Applies amount filter after single page fetch
-- Filter chaining: keyword filter applies first, then amount filter
-- Works seamlessly with existing pagination logic
-- No linting errors introduced
-- Uses actual signed transaction amounts (negative for expenses, positive for income)
