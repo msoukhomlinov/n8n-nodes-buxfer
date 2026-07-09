@@ -5,14 +5,13 @@
  * loads its own copies. JavaScript `instanceof` fails across module copies.
  * This module resolves both classes from n8n's module tree using `createRequire()`.
  *
- * Resolution order (symmetric for zod and DynamicStructuredTool):
- * 1. require.main anchor — createRequire(require.main.filename). Guarded: if
- *    require.main is undefined (ESM-launched n8n, queue-mode / worker_threads) we do
- *    NOT fall back to __filename, because that self-resolves our OWN bundled copy.
- * 2. filesystem anchor (@langchain/classic) — for DynamicStructuredTool on hoisted
- *    npm installs where require.resolve can walk into n8n's langchain tree.
- * 3. requireFromCachedTree — positive anchor for pnpm-strict-isolated installs
- *    (n8n v2.29.x+) where this package lives outside n8n's node_modules.
+ * Resolution order:
+ * DynamicStructuredTool: require.main → filesystem anchor → requireFromCachedTree
+ * zod: require.main → filesystem anchor (same @langchain tree) → requireFromCachedTree
+ *
+ * zod must be resolved from the LangChain filesystem anchor before falling back to
+ * generic n8n-owned packages — n8n-workflow is already in require.cache (this node
+ * imports it) and may pin a different zod copy than @langchain/core expects.
  */
 import { createRequire } from 'node:module';
 import type { DynamicStructuredTool } from '@langchain/core/tools';
@@ -181,6 +180,23 @@ function resolveRuntimeZod(): ZodNamespace | undefined {
 					_runtimeZod = mod;
 					zodLoadError = null;
 					zodResolutionDiagnostic = 'resolved via require.main';
+					return mod;
+				}
+			}
+		} catch (e) {
+			zodLoadError = e instanceof Error ? e.message : String(e);
+		}
+	}
+
+	if (_filesystemAnchorReq) {
+		try {
+			const zodPath = _filesystemAnchorReq.resolve('zod');
+			if (!zodPath.includes(OWN_PACKAGE_NAME)) {
+				const mod = _filesystemAnchorReq('zod');
+				if (isZodNamespace(mod)) {
+					_runtimeZod = mod;
+					zodLoadError = null;
+					zodResolutionDiagnostic = _anchorDiagnostic ?? 'resolved via filesystem anchor';
 					return mod;
 				}
 			}
