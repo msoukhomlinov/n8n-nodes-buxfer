@@ -2,6 +2,11 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## [0.5.3] - 2026-07-09
+
+### Fixed
+- **AI Tools – LangChain/zod runtime resolution**: AI Tools now resolves `DynamicStructuredTool` and `zod` from n8n's module tree on pnpm-strict-isolated installs (n8n ≥2.29.x), preserving `instanceof ZodType` identity for tool schema normalisation. `@langchain/core` moved to optional peer dependency (host-provided by n8n).
+
 ## [0.5.2] - 2026-04-06
 
 ### Fixed
