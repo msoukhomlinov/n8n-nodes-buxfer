@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-buxfer",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "n8n community node for Buxfer personal finance API",
   "keywords": [
     "n8n-community-node-package",
@@ -39,6 +39,7 @@
     ]
   },
   "devDependencies": {
+    "@langchain/core": "^0.3.43",
     "@types/flat-cache": "^2.0.2",
     "@types/node": "^24.9.1",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
@@ -50,10 +51,15 @@
     "typescript": "^5.9.2"
   },
   "peerDependencies": {
-    "n8n-workflow": "*"
+    "n8n-workflow": "*",
+    "@langchain/core": "*"
+  },
+  "peerDependenciesMeta": {
+    "@langchain/core": {
+      "optional": true
+    }
   },
   "dependencies": {
-    "@langchain/core": ">=0.3.0",
     "flat-cache": "^6.1.18",
     "zod": "^3.24.0"
   }
