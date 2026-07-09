@@ -7,13 +7,17 @@
  *
  * Resolution order:
  * DynamicStructuredTool: require.main → filesystem anchor → cached-tree scan
- * zod: same require function that resolved DynamicStructuredTool → independent fallback
+ * zod: from the resolved `@langchain/core/tools` file's own directory → independent fallback
  *
- * zod is resolved from whichever require function successfully loaded
- * `@langchain/core/tools`, not independently. On pnpm-isolated installs
- * require.main can resolve n8n's top-level `zod` while `@langchain/core/tools`
- * only resolves from a nested LangChain tree (or vice versa); pinning zod from
- * a different tree than the one DynamicStructuredTool loads from reintroduces
+ * zod is resolved via `createRequire(toolsModulePath)`, not from the anchor
+ * require that merely reached `@langchain/core/tools`. Reaching a module and
+ * matching its internal dependency resolution are different things: under
+ * pnpm's isolated (non-hoisted) layout, `@langchain/core` can carry its own
+ * private `zod`, distinct from whatever the anchor's own directory resolves.
+ * Node resolves bare specifiers relative to the requiring *file's* directory,
+ * so only `createRequire(toolsModulePath)('zod')` replays the exact walk that
+ * `@langchain/core/tools`'s own internal `require('zod')` performs. Resolving
+ * zod from the anchor req instead can pin a different copy and reintroduce
  * the cross-copy `instanceof ZodType` failure this file exists to prevent.
  */
 import { createRequire } from 'node:module';
@@ -51,7 +55,7 @@ function packageKeyPattern(pkg: string): RegExp {
 function findCachedTreeAnchor(
 	patterns: readonly string[],
 	id: string,
-): { req: RuntimeRequire; resolved: unknown } | undefined {
+): { req: RuntimeRequire; resolved: unknown; resolvedPath: string } | undefined {
 	const cache = require.cache;
 	if (!cache) return undefined;
 	const keys = Object.keys(cache);
@@ -62,8 +66,9 @@ function findCachedTreeAnchor(
 			if (!anchorPattern.test(key)) continue;
 			try {
 				const anchorReq = createRequire(key) as RuntimeRequire;
+				const resolvedPath = anchorReq.resolve(id);
 				const resolved = anchorReq(id);
-				if (resolved) return { req: anchorReq, resolved };
+				if (resolved) return { req: anchorReq, resolved, resolvedPath };
 			} catch {
 				// This cached module can't reach `id`; try the next cached key / pattern.
 			}
@@ -109,8 +114,8 @@ const { runtimeReq: _filesystemAnchorReq, diagnostic: _anchorDiagnostic } =
 
 let _RuntimeDynamicStructuredTool: DynamicStructuredToolCtor | undefined;
 let _runtimeZod: ZodNamespace | undefined;
-/** The require function that successfully resolved `@langchain/core/tools`; zod must be resolved from the same tree. */
-let _langchainAnchorReq: RuntimeRequire | undefined;
+/** Resolved filesystem path of `@langchain/core/tools`; zod must be resolved from a require bound to THIS path. */
+let _toolsModulePath: string | undefined;
 let langchainResolutionDiagnostic: string | null = null;
 let zodResolutionDiagnostic: string | null = null;
 let langchainLoadError: string | null = null;
@@ -138,7 +143,7 @@ function resolveDynamicStructuredTool(): DynamicStructuredToolCtor | undefined {
 				const ctor = extractDynamicStructuredTool(_mainReq('@langchain/core/tools'));
 				if (ctor) {
 					_RuntimeDynamicStructuredTool = ctor;
-					_langchainAnchorReq = _mainReq;
+					_toolsModulePath = toolsPath;
 					langchainLoadError = null;
 					langchainResolutionDiagnostic = 'resolved via require.main';
 					return ctor;
@@ -156,7 +161,7 @@ function resolveDynamicStructuredTool(): DynamicStructuredToolCtor | undefined {
 				const ctor = extractDynamicStructuredTool(_filesystemAnchorReq('@langchain/core/tools'));
 				if (ctor) {
 					_RuntimeDynamicStructuredTool = ctor;
-					_langchainAnchorReq = _filesystemAnchorReq;
+					_toolsModulePath = toolsPath;
 					langchainLoadError = null;
 					langchainResolutionDiagnostic = _anchorDiagnostic ?? 'resolved via filesystem anchor';
 					return ctor;
@@ -172,7 +177,7 @@ function resolveDynamicStructuredTool(): DynamicStructuredToolCtor | undefined {
 		const ctor = cached ? extractDynamicStructuredTool(cached.resolved) : undefined;
 		if (ctor && cached) {
 			_RuntimeDynamicStructuredTool = ctor;
-			_langchainAnchorReq = cached.req;
+			_toolsModulePath = cached.resolvedPath;
 			langchainLoadError = null;
 			langchainResolutionDiagnostic = 'resolved via n8n-owned-tree anchor (pnpm-isolated install)';
 			return ctor;
@@ -187,20 +192,24 @@ function resolveDynamicStructuredTool(): DynamicStructuredToolCtor | undefined {
 function resolveRuntimeZod(): ZodNamespace | undefined {
 	if (_runtimeZod) return _runtimeZod;
 
-	// Resolve the LangChain anchor first so zod comes from the SAME require tree —
-	// LangChain's internal `instanceof ZodType` checks must see the zod copy it was
-	// built against, not whichever copy happens to resolve first independently.
+	// Resolve DynamicStructuredTool first so `_toolsModulePath` is populated. zod must
+	// come from a require bound to THAT file's own directory — not from the anchor req
+	// that merely reached it — so it replays the exact node_modules walk that
+	// `@langchain/core/tools`'s own internal `require('zod')` performs. Reaching a
+	// module and matching its internal dependency resolution are different things
+	// under pnpm's isolated layout, where `@langchain/core` can carry a private zod.
 	resolveDynamicStructuredTool();
 
-	if (_langchainAnchorReq) {
+	if (_toolsModulePath) {
 		try {
-			const zodPath = _langchainAnchorReq.resolve('zod');
+			const toolsModuleReq = createRequire(_toolsModulePath) as RuntimeRequire;
+			const zodPath = toolsModuleReq.resolve('zod');
 			if (!zodPath.includes(OWN_PACKAGE_NAME)) {
-				const mod = _langchainAnchorReq('zod');
+				const mod = toolsModuleReq('zod');
 				if (isZodNamespace(mod)) {
 					_runtimeZod = mod;
 					zodLoadError = null;
-					zodResolutionDiagnostic = `resolved via LangChain anchor (${langchainResolutionDiagnostic ?? 'unknown'})`;
+					zodResolutionDiagnostic = `resolved via @langchain/core/tools module path (${langchainResolutionDiagnostic ?? 'unknown'})`;
 					return mod;
 				}
 			}
@@ -209,7 +218,7 @@ function resolveRuntimeZod(): ZodNamespace | undefined {
 		}
 	}
 
-	// Independent fallbacks — only reached if the LangChain anchor is unavailable or
+	// Independent fallbacks — only reached if the tools module path is unavailable or
 	// can't resolve zod itself. Best-effort; may not match the LangChain module tree.
 	if (_mainReq) {
 		try {
