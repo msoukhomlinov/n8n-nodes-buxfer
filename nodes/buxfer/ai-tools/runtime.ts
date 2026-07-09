@@ -6,12 +6,15 @@
  * This module resolves both classes from n8n's module tree using `createRequire()`.
  *
  * Resolution order:
- * DynamicStructuredTool: require.main → filesystem anchor → requireFromCachedTree
- * zod: require.main → filesystem anchor (same @langchain tree) → requireFromCachedTree
+ * DynamicStructuredTool: require.main → filesystem anchor → cached-tree scan
+ * zod: same require function that resolved DynamicStructuredTool → independent fallback
  *
- * zod must be resolved from the LangChain filesystem anchor before falling back to
- * generic n8n-owned packages — n8n-workflow is already in require.cache (this node
- * imports it) and may pin a different zod copy than @langchain/core expects.
+ * zod is resolved from whichever require function successfully loaded
+ * `@langchain/core/tools`, not independently. On pnpm-isolated installs
+ * require.main can resolve n8n's top-level `zod` while `@langchain/core/tools`
+ * only resolves from a nested LangChain tree (or vice versa); pinning zod from
+ * a different tree than the one DynamicStructuredTool loads from reintroduces
+ * the cross-copy `instanceof ZodType` failure this file exists to prevent.
  */
 import { createRequire } from 'node:module';
 import type { DynamicStructuredTool } from '@langchain/core/tools';
@@ -44,7 +47,11 @@ function packageKeyPattern(pkg: string): RegExp {
 	return new RegExp(`[\\\\/]${parts.join('[\\\\/]')}[\\\\/]`);
 }
 
-function requireFromCachedTree(patterns: readonly string[], id: string): unknown {
+/** Scans require.cache for a module belonging to one of `patterns` that can resolve `id`. */
+function findCachedTreeAnchor(
+	patterns: readonly string[],
+	id: string,
+): { req: RuntimeRequire; resolved: unknown } | undefined {
 	const cache = require.cache;
 	if (!cache) return undefined;
 	const keys = Object.keys(cache);
@@ -54,9 +61,9 @@ function requireFromCachedTree(patterns: readonly string[], id: string): unknown
 			if (key.includes(OWN_PACKAGE_NAME)) continue;
 			if (!anchorPattern.test(key)) continue;
 			try {
-				const anchorReq = createRequire(key);
+				const anchorReq = createRequire(key) as RuntimeRequire;
 				const resolved = anchorReq(id);
-				if (resolved) return resolved;
+				if (resolved) return { req: anchorReq, resolved };
 			} catch {
 				// This cached module can't reach `id`; try the next cached key / pattern.
 			}
@@ -102,7 +109,9 @@ const { runtimeReq: _filesystemAnchorReq, diagnostic: _anchorDiagnostic } =
 
 let _RuntimeDynamicStructuredTool: DynamicStructuredToolCtor | undefined;
 let _runtimeZod: ZodNamespace | undefined;
-let langchainResolutionDiagnostic: string | null = _anchorDiagnostic;
+/** The require function that successfully resolved `@langchain/core/tools`; zod must be resolved from the same tree. */
+let _langchainAnchorReq: RuntimeRequire | undefined;
+let langchainResolutionDiagnostic: string | null = null;
 let zodResolutionDiagnostic: string | null = null;
 let langchainLoadError: string | null = null;
 let zodLoadError: string | null = null;
@@ -124,12 +133,16 @@ function resolveDynamicStructuredTool(): DynamicStructuredToolCtor | undefined {
 
 	if (_mainReq) {
 		try {
-			const ctor = extractDynamicStructuredTool(_mainReq('@langchain/core/tools'));
-			if (ctor) {
-				_RuntimeDynamicStructuredTool = ctor;
-				langchainLoadError = null;
-				langchainResolutionDiagnostic = 'resolved via require.main';
-				return ctor;
+			const toolsPath = _mainReq.resolve('@langchain/core/tools');
+			if (!toolsPath.includes(OWN_PACKAGE_NAME)) {
+				const ctor = extractDynamicStructuredTool(_mainReq('@langchain/core/tools'));
+				if (ctor) {
+					_RuntimeDynamicStructuredTool = ctor;
+					_langchainAnchorReq = _mainReq;
+					langchainLoadError = null;
+					langchainResolutionDiagnostic = 'resolved via require.main';
+					return ctor;
+				}
 			}
 		} catch (e) {
 			langchainLoadError = e instanceof Error ? e.message : String(e);
@@ -138,12 +151,16 @@ function resolveDynamicStructuredTool(): DynamicStructuredToolCtor | undefined {
 
 	if (_filesystemAnchorReq) {
 		try {
-			const ctor = extractDynamicStructuredTool(_filesystemAnchorReq('@langchain/core/tools'));
-			if (ctor) {
-				_RuntimeDynamicStructuredTool = ctor;
-				langchainLoadError = null;
-				langchainResolutionDiagnostic = _anchorDiagnostic ?? 'resolved via filesystem anchor';
-				return ctor;
+			const toolsPath = _filesystemAnchorReq.resolve('@langchain/core/tools');
+			if (!toolsPath.includes(OWN_PACKAGE_NAME)) {
+				const ctor = extractDynamicStructuredTool(_filesystemAnchorReq('@langchain/core/tools'));
+				if (ctor) {
+					_RuntimeDynamicStructuredTool = ctor;
+					_langchainAnchorReq = _filesystemAnchorReq;
+					langchainLoadError = null;
+					langchainResolutionDiagnostic = _anchorDiagnostic ?? 'resolved via filesystem anchor';
+					return ctor;
+				}
 			}
 		} catch (e) {
 			langchainLoadError = e instanceof Error ? e.message : String(e);
@@ -151,14 +168,13 @@ function resolveDynamicStructuredTool(): DynamicStructuredToolCtor | undefined {
 	}
 
 	try {
-		const ctor = extractDynamicStructuredTool(
-			requireFromCachedTree(LANGCHAIN_TREE_PATTERNS, '@langchain/core/tools'),
-		);
-		if (ctor) {
+		const cached = findCachedTreeAnchor(LANGCHAIN_TREE_PATTERNS, '@langchain/core/tools');
+		const ctor = cached ? extractDynamicStructuredTool(cached.resolved) : undefined;
+		if (ctor && cached) {
 			_RuntimeDynamicStructuredTool = ctor;
+			_langchainAnchorReq = cached.req;
 			langchainLoadError = null;
-			langchainResolutionDiagnostic =
-				'resolved via n8n-owned-tree anchor (pnpm-isolated install)';
+			langchainResolutionDiagnostic = 'resolved via n8n-owned-tree anchor (pnpm-isolated install)';
 			return ctor;
 		}
 	} catch (e) {
@@ -171,6 +187,30 @@ function resolveDynamicStructuredTool(): DynamicStructuredToolCtor | undefined {
 function resolveRuntimeZod(): ZodNamespace | undefined {
 	if (_runtimeZod) return _runtimeZod;
 
+	// Resolve the LangChain anchor first so zod comes from the SAME require tree —
+	// LangChain's internal `instanceof ZodType` checks must see the zod copy it was
+	// built against, not whichever copy happens to resolve first independently.
+	resolveDynamicStructuredTool();
+
+	if (_langchainAnchorReq) {
+		try {
+			const zodPath = _langchainAnchorReq.resolve('zod');
+			if (!zodPath.includes(OWN_PACKAGE_NAME)) {
+				const mod = _langchainAnchorReq('zod');
+				if (isZodNamespace(mod)) {
+					_runtimeZod = mod;
+					zodLoadError = null;
+					zodResolutionDiagnostic = `resolved via LangChain anchor (${langchainResolutionDiagnostic ?? 'unknown'})`;
+					return mod;
+				}
+			}
+		} catch (e) {
+			zodLoadError = e instanceof Error ? e.message : String(e);
+		}
+	}
+
+	// Independent fallbacks — only reached if the LangChain anchor is unavailable or
+	// can't resolve zod itself. Best-effort; may not match the LangChain module tree.
 	if (_mainReq) {
 		try {
 			const zodPath = _mainReq.resolve('zod');
@@ -206,12 +246,12 @@ function resolveRuntimeZod(): ZodNamespace | undefined {
 	}
 
 	try {
-		const mod = requireFromCachedTree(ZOD_TREE_PATTERNS, 'zod');
-		if (isZodNamespace(mod)) {
-			_runtimeZod = mod;
+		const cached = findCachedTreeAnchor(ZOD_TREE_PATTERNS, 'zod');
+		if (cached && isZodNamespace(cached.resolved)) {
+			_runtimeZod = cached.resolved;
 			zodLoadError = null;
 			zodResolutionDiagnostic = 'resolved via n8n-owned-tree anchor (pnpm-isolated install)';
-			return mod;
+			return cached.resolved;
 		}
 	} catch (e) {
 		zodLoadError = e instanceof Error ? e.message : String(e);
@@ -238,17 +278,18 @@ export const RuntimeDynamicStructuredTool: DynamicStructuredToolCtor = new Proxy
 					'[BuxferAiTools] DynamicStructuredTool could not be resolved from n8n runtime. ' +
 						'Ensure @langchain/core is installed in the n8n environment.' +
 						(langchainResolutionDiagnostic ? ` Diagnostic: ${langchainResolutionDiagnostic}` : '') +
+						(_anchorDiagnostic ? ` Filesystem anchor probe: ${_anchorDiagnostic}` : '') +
 						(langchainLoadError ? ` Load error: ${langchainLoadError}` : ''),
 				);
 			}
 			return new (ctor as any)(...args) as object;
 		},
 		get(_target, prop) {
-			const ctor = resolveDynamicStructuredTool();
-			if (ctor) {
-				return (ctor as any)[prop];
+			if (typeof prop === 'symbol' || prop === 'then' || prop === 'constructor') {
+				return undefined;
 			}
-			return undefined;
+			const ctor = resolveDynamicStructuredTool();
+			return ctor ? (ctor as any)[prop] : undefined;
 		},
 	},
 ) as DynamicStructuredToolCtor;
