@@ -62,5 +62,15 @@
   "dependencies": {
     "flat-cache": "^6.1.18",
     "zod": "^3.24.0"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "@isaacs/brace-expansion": "5.0.1",
+    "flatted": "3.4.4",
+    "form-data": "4.0.6",
+    "js-yaml": "4.3.1",
+    "lodash": "4.18.1",
+    "minimatch": "10.2.6",
+    "picomatch": "2.3.2"
   }
 }
