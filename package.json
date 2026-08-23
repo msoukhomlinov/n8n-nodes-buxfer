@@ -51,8 +51,8 @@
     "typescript": "^5.9.2"
   },
   "peerDependencies": {
-    "n8n-workflow": "*",
-    "@langchain/core": "*"
+    "@langchain/core": "*",
+    "n8n-workflow": "*"
   },
   "peerDependenciesMeta": {
     "@langchain/core": {
@@ -60,7 +60,7 @@
     }
   },
   "dependencies": {
-    "flat-cache": "^6.1.18",
+    "flat-cache": "^6.1.23",
     "zod": "^3.24.0"
   }
 }
