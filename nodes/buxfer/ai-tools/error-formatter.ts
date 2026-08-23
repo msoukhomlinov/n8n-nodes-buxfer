@@ -50,25 +50,15 @@ export const ERROR_TYPES = {
 // ---------------------------------------------------------------------------
 // Factories
 // ---------------------------------------------------------------------------
-/**
- * Fallback identifier for the envelope `tool` field when the registered tool
- * name is not supplied. The registered name is `buxfer_{resource}` (see
- * tool-naming.ts); callers in the AI-tools path always pass it, so this
- * resource-only form is only a last-resort default.
- */
-function toolName(resource: string): string {
-	return resource;
-}
-
 export function wrapSuccess(
 	resource: string,
 	operation: string,
 	result: Record<string, unknown>,
-	mainToolName?: string,
+	mainToolName: string,
 ): SuccessEnvelope {
 	return {
 		schemaVersion: '1',
-		tool: mainToolName ?? toolName(resource),
+		tool: mainToolName,
 		resource,
 		operation,
 		success: true,
@@ -82,12 +72,12 @@ export function wrapError(
 	errorType: string,
 	message: string,
 	nextAction: string,
-	context?: Record<string, unknown>,
-	mainToolName?: string,
+	context: Record<string, unknown> | undefined,
+	mainToolName: string,
 ): ErrorEnvelope {
 	return {
 		schemaVersion: '1',
-		tool: mainToolName ?? toolName(resource),
+		tool: mainToolName,
 		resource,
 		operation,
 		success: false,
@@ -107,7 +97,7 @@ export function formatApiError(
 	resource: string,
 	operation: string,
 	message: string,
-	mainToolName?: string,
+	mainToolName: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
@@ -123,14 +113,14 @@ export function formatApiError(
 export function formatMissingIdError(
 	resource: string,
 	operation: string,
-	mainToolName?: string,
+	mainToolName: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
 		operation,
 		ERROR_TYPES.MISSING_ENTITY_ID,
 		`A numeric ID is required for ${operation}.`,
-		`Use ${mainToolName ?? resource} with operation 'getAll' to find the ID first.`,
+		`Use ${mainToolName} with operation 'getAll' to find the ID first.`,
 		undefined,
 		mainToolName,
 	);
@@ -140,14 +130,14 @@ export function formatNotFoundError(
 	resource: string,
 	operation: string,
 	id: number | string,
-	mainToolName?: string,
+	mainToolName: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
 		operation,
 		ERROR_TYPES.ENTITY_NOT_FOUND,
 		`${resource} with id ${id} was not found.`,
-		`Verify the ID. Use ${mainToolName ?? resource} with operation 'getAll' to list available ${resource}s.`,
+		`Verify the ID. Use ${mainToolName} with operation 'getAll' to list available ${resource}s.`,
 		undefined,
 		mainToolName,
 	);
@@ -157,14 +147,14 @@ export function formatNoResultsFound(
 	resource: string,
 	operation: string,
 	filtersUsed: Record<string, unknown>,
-	mainToolName?: string,
+	mainToolName: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
 		operation,
 		ERROR_TYPES.NO_RESULTS_FOUND,
 		`No ${resource}s matched the given filters.`,
-		`Broaden your filters or use ${mainToolName ?? resource} with operation 'getAll' without filters to list all.`,
+		`Broaden your filters or use ${mainToolName} with operation 'getAll' without filters to list all.`,
 		{ filtersUsed },
 		mainToolName,
 	);
