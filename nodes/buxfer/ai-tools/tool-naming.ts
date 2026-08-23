@@ -13,9 +13,13 @@
  * kept as the primary, informative identifier and the node name is the instance
  * disambiguator — so renaming a node renames its tools, which is exactly what
  * the n8n collision error suggests ("please rename them to avoid conflicts").
- * We deliberately do NOT append a generated counter/hash: the node name carries
- * the meaning, and a well-named node yields a fully descriptive tool name.
+ * We deliberately do NOT append a generated counter: the node name carries the
+ * meaning, and a well-named node yields a fully descriptive tool name. Only
+ * when the name is too long and must be truncated do we append a short hash of
+ * the full original name — a last-resort discriminator so two distinct names
+ * that share a long prefix cannot collapse into the same tool name.
  */
+import crypto from 'crypto';
 import type { INode } from 'n8n-workflow';
 import * as n8nWorkflow from 'n8n-workflow';
 
@@ -63,18 +67,59 @@ export interface ToolNames {
 	listTags: string;
 }
 
+/** Length of the `_<hash>` discriminator appended to truncated names. */
+const NAME_HASH_LENGTH = 8;
+/** Total length of the `_<hash>` discriminator, underscore included. */
+const DISCRIMINATOR_LENGTH = NAME_HASH_LENGTH + 1;
+
 /**
- * Compose `<prefix><sanitized node name>`, truncating the node-name suffix so
- * the total never exceeds MAX_TOOL_NAME_LENGTH. The prefix always ends in an
- * underscore; if the suffix is empty the trailing underscore is dropped.
+ * Short stable discriminator (8 lowercase hex chars) for a node name.
+ *
+ * Hashes the FULL original name — before sanitization — so names that differ
+ * only in punctuation or spacing (which sanitization collapses) still get
+ * distinct discriminators. Deterministic across runs and machines.
+ */
+function nodeNameHash(name: string): string {
+	return crypto
+		.createHash('sha1')
+		.update(name, 'utf8')
+		.digest('hex')
+		.slice(0, NAME_HASH_LENGTH);
+}
+
+/**
+ * Compose `<prefix><sanitized node name>`, keeping the total within
+ * MAX_TOOL_NAME_LENGTH. The prefix always ends in an underscore; if the
+ * sanitized suffix is empty the trailing underscore is dropped.
+ *
+ * When the sanitized name fits within the budget it is kept exactly as-is —
+ * purely informative, with no extra suffix. When it must be truncated, the
+ * distinguishing tail would be discarded and two distinct names sharing a long
+ * prefix would collide, so a short stable hash of the FULL original node name
+ * is appended instead: `<prefix><truncatedName>_<hash>`. The hash also
+ * captures punctuation/spacing differences that sanitization collapses, and
+ * the total length still never exceeds MAX_TOOL_NAME_LENGTH.
  */
 function withNodeSuffix(prefix: string, node: INode): string {
 	const suffix = sanitizeNodeName(node.name);
 	const budget = MAX_TOOL_NAME_LENGTH - prefix.length;
 	if (budget <= 0) return prefix.slice(0, MAX_TOOL_NAME_LENGTH);
-	let s = suffix;
-	if (s.length > budget) s = s.slice(0, budget).replace(/[_-]+$/, '');
-	return s ? `${prefix}${s}` : prefix.replace(/[_-]+$/, '');
+	if (!suffix) return prefix.replace(/[_-]+$/, '');
+	if (suffix.length <= budget) return `${prefix}${suffix}`;
+
+	// Truncation would discard the part that distinguishes this node from
+	// another with the same long prefix — append a stable hash discriminator
+	// instead so the names stay unique.
+	const hash = nodeNameHash(node.name);
+	const nameBudget = budget - DISCRIMINATOR_LENGTH;
+	if (nameBudget <= 0) {
+		// The prefix leaves room for neither the name nor the full
+		// discriminator; degrade to as much of the hash as fits.
+		return `${prefix}${hash.slice(0, budget)}`;
+	}
+	const truncated = suffix.slice(0, nameBudget).replace(/[_-]+$/, '');
+	const s = truncated ? `${truncated}_${hash}` : hash;
+	return `${prefix}${s}`;
 }
 
 /** Build the full set of tool names for a node instance and resource. */
