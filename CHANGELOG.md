@@ -2,6 +2,11 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## [0.6.0] - 2026-08-10
+
+### Changed
+- **Buxfer node – native n8n HTTP client**: Replaced direct `axios` usage with n8n's built-in `helpers.httpRequest()` in `api.ts`. The node no longer needs an axios runtime dependency (this also resolves the "Cannot find module 'axios'" install failure), and requests now go through n8n's standard outbound HTTP stack (proxy settings, SSRF protection, default user agent). Token caching, 401 auto-retry, and 429 rate-limit handling are preserved.
+
 ## [0.5.3] - 2026-07-09
 
 ### Fixed

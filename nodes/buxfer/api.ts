@@ -1,6 +1,12 @@
-import type { IExecuteFunctions, ILoadOptionsFunctions, ISupplyDataFunctions } from 'n8n-workflow';
+import type {
+  IDataObject,
+  IExecuteFunctions,
+  IHttpRequestOptions,
+  ILoadOptionsFunctions,
+  IN8nHttpFullResponse,
+  ISupplyDataFunctions,
+} from 'n8n-workflow';
 import { NodeOperationError, NodeApiError } from 'n8n-workflow';
-import axios, { AxiosResponse } from 'axios';
 
 // Debug flag - set to true to enable console logging
 const DEBUG_ENABLED = true;
@@ -40,31 +46,26 @@ export async function buxferApiLogin(context: IExecuteFunctions | ILoadOptionsFu
       formDataLength: params.toString().length
     });
 
-    const response: AxiosResponse<BuxferLoginResponse> = await axios.post(
-      'https://www.buxfer.com/api/login',
-      params.toString(),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      }
-    );
+    const response = (await context.helpers.httpRequest({
+      method: 'POST',
+      url: 'https://www.buxfer.com/api/login',
+      body: params,
+    })) as BuxferLoginResponse;
 
     debug('Login response', {
-      status: response.status,
-      dataKeys: Object.keys(response.data || {}),
-      hasResponse: !!response.data?.response,
-      hasToken: !!response.data?.response?.token
+      dataKeys: Object.keys(response || {}),
+      hasResponse: !!response?.response,
+      hasToken: !!response?.response?.token
     });
 
-    if (response.data?.response?.token) {
-      tokenCache = response.data.response.token;
+    if (response?.response?.token) {
+      tokenCache = response.response.token;
       tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
       debug('Login successful - token cached');
       return tokenCache;
     }
 
-    debug('Login failed - invalid response structure', response.data);
+    debug('Login failed - invalid response structure', response);
     throw new NodeApiError(context.getNode(), { message: 'Login failed: Invalid response from Buxfer API' });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -98,6 +99,8 @@ export async function buxferApiRequest(
   endpoint: string,
   data?: any
 ): Promise<any> {
+  let response: IN8nHttpFullResponse;
+
   try {
     const token = await getValidToken(context);
     const url = `https://www.buxfer.com/api${endpoint}`;
@@ -110,31 +113,32 @@ export async function buxferApiRequest(
       dataKeys: data ? Object.keys(data) : []
     });
 
-    const config: any = {
-      method,
-      url,
-      headers: {},
-    };
+    const buildOptions = (requestToken: string): IHttpRequestOptions => {
+      const options: IHttpRequestOptions = {
+        method,
+        url,
+        ignoreHttpStatusErrors: true,
+        returnFullResponse: true,
+      };
 
-    if (method === 'GET') {
-      // For GET requests, add token and data as query parameters
-      const params = new URLSearchParams({ token });
-      if (data) {
-        Object.entries(data).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            params.append(key, String(value));
-          }
-        });
-      }
-      config.url += '?' + params.toString();
-      debug('GET request URL', { finalUrl: config.url });
-    } else if (method === 'POST') {
-      // For POST requests, add token to query and data as form-encoded body
-      config.url += '?token=' + encodeURIComponent(token);
-      config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+      if (method === 'GET') {
+        // For GET requests, add token and data as query parameters
+        const qs: IDataObject = { token: requestToken };
+        if (data) {
+          Object.entries(data).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              qs[key] = String(value);
+            }
+          });
+        }
+        options.qs = qs;
+        debug('GET request query', { qs });
+      } else {
+        // For POST requests, add token to query and data as form-encoded body
+        options.qs = { token: requestToken };
 
-      if (data) {
-        const params = new URLSearchParams();
+        if (data) {
+          const params = new URLSearchParams();
           Object.entries(data).forEach(([key, value]) => {
             if (value !== undefined && value !== null) {
               // Special handling for JSON objects and arrays (payers, sharers)
@@ -145,64 +149,36 @@ export async function buxferApiRequest(
               }
             }
           });
-        config.data = params.toString();
-        debug('POST request data', {
-          dataLength: config.data.length,
-          dataPreview: config.data.substring(0, 200) + (config.data.length > 200 ? '...' : '')
-        });
+          options.body = params;
+          const encoded = params.toString();
+          debug('POST request data', {
+            dataLength: encoded.length,
+            dataPreview: encoded.substring(0, 200) + (encoded.length > 200 ? '...' : '')
+          });
+        }
+        debug('POST request query', { qs: options.qs });
       }
-      debug('POST request URL', { finalUrl: config.url });
-    }
+
+      return options;
+    };
+
+    let options = buildOptions(token);
 
     debug('Making API request...');
-    const response: AxiosResponse = await axios(config);
+    response = (await context.helpers.httpRequest(options)) as IN8nHttpFullResponse;
 
-    debug('API response', {
-      status: response.status,
-      statusText: response.statusText,
-      dataKeys: Object.keys(response.data || {}),
-      dataPreview: JSON.stringify(response.data, null, 2).substring(0, 500) + '...'
-    });
-
-    if (response.status === 401) {
+    if (response.statusCode === 401) {
       debug('Token expired, retrying with new token...');
       // Token expired, clear cache and retry once
       tokenCache = null;
       tokenExpiry = null;
       const newToken = await getValidToken(context);
 
-      // Update the request with new token
-      if (method === 'GET') {
-        const params = new URLSearchParams({ token: newToken });
-        if (data) {
-          Object.entries(data).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-              params.append(key, String(value));
-            }
-          });
-        }
-        config.url = `https://www.buxfer.com/api${endpoint}?` + params.toString();
-      } else {
-        config.url = `https://www.buxfer.com/api${endpoint}?token=` + encodeURIComponent(newToken);
-      }
-
-      debug('Retry request URL', { retryUrl: config.url });
-      const retryResponse = await axios(config);
+      options = buildOptions(newToken);
+      response = (await context.helpers.httpRequest(options)) as IN8nHttpFullResponse;
       debug('Retry successful');
-      return retryResponse.data;
     }
-
-    debug('Request successful');
-    return response.data;
   } catch (error) {
-    if (error instanceof Error && 'response' in error && (error as any).response?.status === 429) {
-      context.logger.error('Rate limit exceeded');
-      throw new NodeOperationError(
-        context.getNode(),
-        'Rate limit exceeded. Please try again later.'
-      );
-    }
-
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     context.logger.error('Buxfer API request failed', { message: errorMessage });
     throw new NodeOperationError(
@@ -210,4 +186,40 @@ export async function buxferApiRequest(
       `Buxfer API request failed: ${errorMessage}`
     );
   }
+
+  debug('API response', {
+    status: response.statusCode,
+    statusText: response.statusMessage,
+    dataKeys: response.body && typeof response.body === 'object' ? Object.keys(response.body as object) : [],
+    dataPreview: JSON.stringify(response.body, null, 2)?.substring(0, 500) + '...'
+  });
+
+  if (response.statusCode === 429) {
+    context.logger.error('Rate limit exceeded');
+    throw new NodeOperationError(
+      context.getNode(),
+      'Rate limit exceeded. Please try again later.'
+    );
+  }
+
+  if (response.statusCode >= 400) {
+    let bodyPreview = '';
+    if (response.body !== null && response.body !== undefined) {
+      try {
+        const raw = typeof response.body === 'string' ? response.body : JSON.stringify(response.body);
+        if (raw) {
+          bodyPreview = ` (body: ${raw.substring(0, 200)})`;
+        }
+      } catch {
+        // Ignore preview serialization failures
+      }
+    }
+    throw new NodeOperationError(
+      context.getNode(),
+      `Buxfer API request failed: HTTP ${response.statusCode}${bodyPreview}`
+    );
+  }
+
+  debug('Request successful');
+  return response.body;
 }
