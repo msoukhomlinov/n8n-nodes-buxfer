@@ -2,6 +2,11 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## [0.6.1] - 2026-08-23
+
+### Fixed
+- **AI Tools – duplicate tool name collision**: Connecting more than one `Buxfer AI Tools` node to the same AI Agent failed with `You have multiple tools with the same name: 'buxfer_listAccounts'`. Every node exposed the discovery helpers (`buxfer_listAccounts`, `buxfer_listTags`) under fixed names, so any two nodes collided — even with different resources — and two nodes of the same resource also collided on the main tool. Tool names are now derived from the node name (n8n's own `nodeNameToToolName` idiom), keeping the resource as the primary, informative identifier: `buxfer_{resource}_{NodeName}`, `buxfer_listAccounts_{NodeName}`, `buxfer_listTags_{NodeName}`. Renaming a node renames its tools — exactly what the n8n error message suggests. All LLM-facing descriptions and error hints now reference the actual (suffixed) tool names.
+
 ## [0.6.0] - 2026-08-23
 
 ### Changed

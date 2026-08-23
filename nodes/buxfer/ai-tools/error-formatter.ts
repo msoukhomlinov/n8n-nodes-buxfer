@@ -114,13 +114,14 @@ export function formatApiError(
 export function formatMissingIdError(
 	resource: string,
 	operation: string,
+	mainToolName?: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
 		operation,
 		ERROR_TYPES.MISSING_ENTITY_ID,
 		`A numeric ID is required for ${operation}.`,
-		`Use buxfer_${resource} with operation 'getAll' to find the ID first.`,
+		`Use ${mainToolName ?? `buxfer_${resource}`} with operation 'getAll' to find the ID first.`,
 	);
 }
 
@@ -128,13 +129,14 @@ export function formatNotFoundError(
 	resource: string,
 	operation: string,
 	id: number | string,
+	mainToolName?: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
 		operation,
 		ERROR_TYPES.ENTITY_NOT_FOUND,
 		`${resource} with id ${id} was not found.`,
-		`Verify the ID. Use buxfer_${resource} with operation 'getAll' to list available ${resource}s.`,
+		`Verify the ID. Use ${mainToolName ?? `buxfer_${resource}`} with operation 'getAll' to list available ${resource}s.`,
 	);
 }
 
@@ -142,13 +144,14 @@ export function formatNoResultsFound(
 	resource: string,
 	operation: string,
 	filtersUsed: Record<string, unknown>,
+	mainToolName?: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
 		operation,
 		ERROR_TYPES.NO_RESULTS_FOUND,
 		`No ${resource}s matched the given filters.`,
-		`Broaden your filters or use buxfer_${resource} with operation 'getAll' without filters to list all.`,
+		`Broaden your filters or use ${mainToolName ?? `buxfer_${resource}`} with operation 'getAll' without filters to list all.`,
 		{ filtersUsed },
 	);
 }

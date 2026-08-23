@@ -6,6 +6,7 @@
  */
 import { z } from 'zod';
 import type { z as zodNamespace } from 'zod';
+import type { ToolNames } from './tool-naming.js';
 
 // ---------------------------------------------------------------------------
 // Constants — shared enums
@@ -47,17 +48,17 @@ export const WRITE_OPERATIONS = ['create', 'update', 'delete'];
 // ---------------------------------------------------------------------------
 
 // -- Transaction schemas --
-function getTransactionGetAllSchema() {
+function getTransactionGetAllSchema(names: ToolNames) {
 	return z.object({
 		operation: z.literal('getAll').describe("List/search transactions."),
 		search: z.string().optional().describe(
 			'ALWAYS use this for text lookups. Searches transaction descriptions. Partial match.',
 		),
 		accountId: z.number().optional().describe(
-			'Filter by account ID (use buxfer_listAccounts to find IDs).',
+			`Filter by account ID (use ${names.listAccounts} to find IDs).`,
 		),
 		tagName: z.string().optional().describe(
-			'Filter by tag name (use buxfer_listTags to discover valid tag names).',
+			`Filter by tag name (use ${names.listTags} to discover valid tag names).`,
 		),
 		startDate: z.string().optional().describe(
 			'Start date for date range filter (YYYY-MM-DD format).',
@@ -74,14 +75,14 @@ function getTransactionGetAllSchema() {
 	});
 }
 
-function getTransactionCreateSchema() {
+function getTransactionCreateSchema(names: ToolNames) {
 	return z.object({
 		operation: z.literal('create').describe('Create a new transaction.'),
 		description: z.string().describe('Transaction description/memo (required).'),
 		amount: z.number().describe('Transaction amount (required). Positive number.'),
 		date: z.string().describe('Transaction date in YYYY-MM-DD format (required).'),
 		accountId: z.number().describe(
-			'Account ID (required). Use buxfer_listAccounts to find the correct ID.',
+			`Account ID (required). Use ${names.listAccounts} to find the correct ID.`,
 		),
 		type: z.enum(TRANSACTION_TYPES).describe(
 			'Transaction type (required): expense = outgoing, income = incoming, transfer = between accounts, sharedBill = split cost, loan = money lent/borrowed, paidForFriend = paid on behalf.',
@@ -90,7 +91,7 @@ function getTransactionCreateSchema() {
 			'Transaction status (required): cleared = confirmed, pending = unconfirmed.',
 		),
 		tags: z.string().optional().describe(
-			'Comma-separated tag names (e.g. "Food,Transport"). Use buxfer_listTags to discover valid names.',
+			`Comma-separated tag names (e.g. "Food,Transport"). Use ${names.listTags} to discover valid names.`,
 		),
 		payers: z.array(z.record(z.unknown())).optional().describe(
 			'For sharedBill type only. Array of {contactId, amount} objects.',
@@ -108,22 +109,22 @@ function getTransactionCreateSchema() {
 	});
 }
 
-function getTransactionUpdateSchema() {
+function getTransactionUpdateSchema(names: ToolNames) {
 	return z.object({
 		operation: z.literal('update').describe('Update an existing transaction.'),
 		id: z.number().describe(
-			'Transaction ID (required). Use buxfer_transaction with operation getAll to find IDs.',
+			`Transaction ID (required). Use ${names.main} with operation getAll to find IDs.`,
 		),
 		description: z.string().optional().describe('Updated description/memo.'),
 		amount: z.number().optional().describe('Updated amount.'),
 		date: z.string().optional().describe('Updated date in YYYY-MM-DD format.'),
 		accountId: z.number().optional().describe(
-			'Updated account ID. Use buxfer_listAccounts to find IDs.',
+			`Updated account ID. Use ${names.listAccounts} to find IDs.`,
 		),
 		type: z.enum(TRANSACTION_TYPES).optional().describe('Updated transaction type.'),
 		status: z.enum(TRANSACTION_STATUSES).optional().describe('Updated status.'),
 		tags: z.string().optional().describe(
-			'Updated comma-separated tag names. Use buxfer_listTags to discover valid names.',
+			`Updated comma-separated tag names. Use ${names.listTags} to discover valid names.`,
 		),
 		payers: z.array(z.record(z.unknown())).optional().describe('For sharedBill type only.'),
 		sharers: z.array(z.record(z.unknown())).optional().describe('For sharedBill type only.'),
@@ -135,11 +136,11 @@ function getTransactionUpdateSchema() {
 	});
 }
 
-function getTransactionDeleteSchema() {
+function getTransactionDeleteSchema(names: ToolNames) {
 	return z.object({
 		operation: z.literal('delete').describe('Delete a transaction.'),
 		id: z.number().describe(
-			'Transaction ID (required). Use buxfer_transaction with operation getAll to find IDs.',
+			`Transaction ID (required). Use ${names.main} with operation getAll to find IDs.`,
 		),
 	});
 }
@@ -192,6 +193,7 @@ export function buildUnifiedSchema(
 	runtimeZ: typeof zodNamespace,
 	resource: string,
 	operations: string[],
+	names: ToolNames,
 ) {
 	if (resource !== 'transaction') {
 		// Read-only resources — simple getAll-only schema
@@ -204,10 +206,10 @@ export function buildUnifiedSchema(
 
 	// Transaction — merge all operation schemas
 	const schemasByOp: Record<string, z.ZodObject<any>> = {
-		getAll: getTransactionGetAllSchema(),
-		create: getTransactionCreateSchema(),
-		update: getTransactionUpdateSchema(),
-		delete: getTransactionDeleteSchema(),
+		getAll: getTransactionGetAllSchema(names),
+		create: getTransactionCreateSchema(names),
+		update: getTransactionUpdateSchema(names),
+		delete: getTransactionDeleteSchema(names),
 	};
 
 	// Filter to only requested operations
@@ -230,7 +232,7 @@ export function isValidOperation(resource: string, operation: string): boolean {
 // ---------------------------------------------------------------------------
 export function getRuntimeSchemaBuilders(runtimeZ: typeof zodNamespace) {
 	return {
-		buildUnifiedSchema: (resource: string, operations: string[]) =>
-			buildUnifiedSchema(runtimeZ, resource, operations),
+		buildUnifiedSchema: (resource: string, operations: string[], names: ToolNames) =>
+			buildUnifiedSchema(runtimeZ, resource, operations, names),
 	};
 }

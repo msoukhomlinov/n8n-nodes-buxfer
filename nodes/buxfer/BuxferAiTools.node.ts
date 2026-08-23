@@ -24,6 +24,7 @@ import {
 	buildListTagsDescription,
 } from './ai-tools/description-builders.js';
 import { executeAiTool } from './ai-tools/tool-executor.js';
+import { buildToolNames } from './ai-tools/tool-naming.js';
 import { wrapError, ERROR_TYPES } from './ai-tools/error-formatter.js';
 import { buxferApiRequest } from './api.js';
 
@@ -200,12 +201,17 @@ export class BuxferAiTools implements INodeType {
 			);
 		}
 
-		// Build schema and description from effective operations only
-		const schema = buildUnifiedSchema(resource, effectiveOps);
-		const description = buildUnifiedDescription(resource, effectiveOps);
+		// Tool names are derived from the node name so multiple nodes on the
+		// same agent never collide (n8n enforces unique tool names). The
+		// resource stays the primary, informative identifier; the node name is
+		// the instance disambiguator — rename the node to rename its tools.
+		const names = buildToolNames(this.getNode(), resource);
 
-		// Tool name: buxfer_{resource} — complies with MCP regex ^[a-zA-Z0-9_-]{1,128}$
-		const toolName = `buxfer_${resource}`;
+		// Build schema and description from effective operations only
+		const schema = buildUnifiedSchema(resource, effectiveOps, names);
+		const description = buildUnifiedDescription(resource, effectiveOps, names);
+
+		const toolName = names.main;
 		const annotations = getMcpAnnotations(effectiveOps);
 
 		const context = this;
@@ -247,7 +253,7 @@ export class BuxferAiTools implements INodeType {
 				// Strip operation from params before passing to executor
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
 				const { operation: _op, ...rest } = params;
-				return executeAiTool(context, resource, operation, rest);
+				return executeAiTool(context, resource, operation, rest, names);
 			},
 		}) as unknown as DynamicStructuredTool;
 
@@ -255,7 +261,7 @@ export class BuxferAiTools implements INodeType {
 		const helperTools: DynamicStructuredTool[] = [];
 
 		const listAccountsTool = new RuntimeDynamicStructuredTool({
-			name: 'buxfer_listAccounts',
+			name: names.listAccounts,
 			description: buildListAccountsDescription(),
 			schema: runtimeZod.object({}) as any,
 			metadata: {
@@ -279,7 +285,7 @@ export class BuxferAiTools implements INodeType {
 		helperTools.push(listAccountsTool);
 
 		const listTagsTool = new RuntimeDynamicStructuredTool({
-			name: 'buxfer_listTags',
+			name: names.listTags,
 			description: buildListTagsDescription(),
 			schema: runtimeZod.object({}) as any,
 			metadata: {
@@ -313,6 +319,9 @@ export class BuxferAiTools implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const resource = this.getNodeParameter('resource', 0) as string;
+
+		// Tool names (for LLM-facing error hints) — derived from the node name.
+		const names = buildToolNames(this.getNode(), resource);
 
 		// Determine effective operations (same logic as supplyData)
 		const allowWriteOperations =
@@ -391,7 +400,7 @@ export class BuxferAiTools implements INodeType {
 			}
 
 			// Execute the tool
-			const resultStr = await executeAiTool(this, resource, requestedOp, json);
+			const resultStr = await executeAiTool(this, resource, requestedOp, json, names);
 			response.push({
 				json: parseToolResult(resultStr),
 				pairedItem: { item: itemIndex },

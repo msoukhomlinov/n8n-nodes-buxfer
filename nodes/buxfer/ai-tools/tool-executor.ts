@@ -6,6 +6,7 @@
  */
 import type { IExecuteFunctions, ISupplyDataFunctions } from 'n8n-workflow';
 import { buxferApiRequest } from '../api.js';
+import type { ToolNames } from './tool-naming.js';
 import {
 	wrapSuccess,
 	wrapError,
@@ -63,6 +64,7 @@ export async function executeAiTool(
 	resource: string,
 	operation: string,
 	params: Record<string, unknown>,
+	names: ToolNames,
 ): Promise<string> {
 	// Strip n8n metadata at entry — before any routing
 	const cleanParams = stripMetadata(params);
@@ -86,7 +88,7 @@ export async function executeAiTool(
 							operation,
 							ERROR_TYPES.INVALID_OPERATION,
 							`Operation '${operation}' is not valid for ${resource}. Only 'getAll' is supported.`,
-							`Use buxfer_${resource} with operation 'getAll'.`,
+							`Use ${names.main} with operation 'getAll'.`,
 						),
 					);
 				}
@@ -159,7 +161,7 @@ export async function executeAiTool(
 						// Filtered empty guard
 						if (hasFilters && transactions.length === 0) {
 							return JSON.stringify(
-								formatNoResultsFound(resource, operation, cleanParams),
+								formatNoResultsFound(resource, operation, cleanParams, names.main),
 							);
 						}
 
@@ -190,7 +192,7 @@ export async function executeAiTool(
 							);
 						if (!cleanParams.accountId)
 							return JSON.stringify(
-								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'accountId is required.', 'Use buxfer_listAccounts to find the correct account ID.'),
+								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'accountId is required.', `Use ${names.listAccounts} to find the correct account ID.`),
 							);
 						if (!cleanParams.type)
 							return JSON.stringify(
@@ -233,7 +235,7 @@ export async function executeAiTool(
 
 					case 'update': {
 						if (!cleanParams.id) {
-							return JSON.stringify(formatMissingIdError(resource, operation));
+							return JSON.stringify(formatMissingIdError(resource, operation, names.main));
 						}
 
 						const data: Record<string, unknown> = {
@@ -279,7 +281,7 @@ export async function executeAiTool(
 
 					case 'delete': {
 						if (!cleanParams.id) {
-							return JSON.stringify(formatMissingIdError(resource, operation));
+							return JSON.stringify(formatMissingIdError(resource, operation, names.main));
 						}
 
 						await buxferApiRequest(context as any, 'POST', '/transaction_delete', {
