@@ -2,6 +2,11 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## [0.5.4] - 2026-08-10
+
+### Fixed
+- **Buxfer node – axios runtime dependency**: The node failed to load in n8n ("Cannot find module 'axios'") because axios was used in `api.ts` but never declared in package.json dependencies, so n8n's community-node installer did not install it. axios is now a declared dependency.
+
 ## [0.5.3] - 2026-07-09
 
 ### Fixed
