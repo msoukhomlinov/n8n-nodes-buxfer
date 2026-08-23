@@ -201,11 +201,11 @@ export class BuxferAiTools implements INodeType {
 			);
 		}
 
-		// Tool names are derived from the node name so multiple nodes on the
-		// same agent never collide (n8n enforces unique tool names). The
-		// resource stays the primary, informative identifier; the node name is
-		// the instance disambiguator — rename the node to rename its tools.
-		const names = buildToolNames(this.getNode(), resource);
+		// Tool names are scoped by resource so nodes with different resources
+		// never collide on the same agent (n8n enforces unique tool names).
+		// Two nodes with the SAME resource still collide — n8n's own
+		// duplicate-tool-name error covers that case.
+		const names = buildToolNames(resource);
 
 		// Build schema and description from effective operations only
 		const schema = buildUnifiedSchema(resource, effectiveOps, names);
@@ -324,8 +324,8 @@ export class BuxferAiTools implements INodeType {
 		const items = this.getInputData();
 		const resource = this.getNodeParameter('resource', 0) as string;
 
-		// Tool names (for LLM-facing error hints) — derived from the node name.
-		const names = buildToolNames(this.getNode(), resource);
+		// Tool names (for LLM-facing error hints) — scoped by resource.
+		const names = buildToolNames(resource);
 
 		// Determine effective operations (same logic as supplyData)
 		const allowWriteOperations =

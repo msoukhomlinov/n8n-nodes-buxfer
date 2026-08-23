@@ -52,7 +52,7 @@ export const ERROR_TYPES = {
 // ---------------------------------------------------------------------------
 /**
  * Fallback identifier for the envelope `tool` field when the registered tool
- * name is not supplied. The registered name is `{resource}_{NodeName}` (see
+ * name is not supplied. The registered name is `buxfer_{resource}` (see
  * tool-naming.ts); callers in the AI-tools path always pass it, so this
  * resource-only form is only a last-resort default.
  */
