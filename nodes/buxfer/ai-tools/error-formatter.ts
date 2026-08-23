@@ -34,8 +34,6 @@ export interface ErrorEnvelope extends ToolEnvelope {
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-const TOOL_NAME_PREFIX = 'buxfer';
-
 export const ERROR_TYPES = {
 	API_ERROR: 'API_ERROR',
 	ENTITY_NOT_FOUND: 'ENTITY_NOT_FOUND',
@@ -52,8 +50,14 @@ export const ERROR_TYPES = {
 // ---------------------------------------------------------------------------
 // Factories
 // ---------------------------------------------------------------------------
+/**
+ * Fallback identifier for the envelope `tool` field when the registered tool
+ * name is not supplied. The registered name is `{resource}_{NodeName}` (see
+ * tool-naming.ts); callers in the AI-tools path always pass it, so this
+ * resource-only form is only a last-resort default.
+ */
 function toolName(resource: string): string {
-	return `${TOOL_NAME_PREFIX}_${resource}`;
+	return resource;
 }
 
 export function wrapSuccess(
@@ -126,7 +130,7 @@ export function formatMissingIdError(
 		operation,
 		ERROR_TYPES.MISSING_ENTITY_ID,
 		`A numeric ID is required for ${operation}.`,
-		`Use ${mainToolName ?? `buxfer_${resource}`} with operation 'getAll' to find the ID first.`,
+		`Use ${mainToolName ?? resource} with operation 'getAll' to find the ID first.`,
 		undefined,
 		mainToolName,
 	);
@@ -143,7 +147,7 @@ export function formatNotFoundError(
 		operation,
 		ERROR_TYPES.ENTITY_NOT_FOUND,
 		`${resource} with id ${id} was not found.`,
-		`Verify the ID. Use ${mainToolName ?? `buxfer_${resource}`} with operation 'getAll' to list available ${resource}s.`,
+		`Verify the ID. Use ${mainToolName ?? resource} with operation 'getAll' to list available ${resource}s.`,
 		undefined,
 		mainToolName,
 	);
@@ -160,7 +164,7 @@ export function formatNoResultsFound(
 		operation,
 		ERROR_TYPES.NO_RESULTS_FOUND,
 		`No ${resource}s matched the given filters.`,
-		`Broaden your filters or use ${mainToolName ?? `buxfer_${resource}`} with operation 'getAll' without filters to list all.`,
+		`Broaden your filters or use ${mainToolName ?? resource} with operation 'getAll' without filters to list all.`,
 		{ filtersUsed },
 		mainToolName,
 	);

@@ -60,11 +60,11 @@ export function sanitizeNodeName(name: string): string {
  * per node (via the node-name suffix) and leads with the informative part.
  */
 export interface ToolNames {
-	/** Main unified tool, e.g. `buxfer_transaction_Buxfer_Expenses`. */
+	/** Main unified tool, e.g. `transaction_Buxfer_Expenses`. */
 	main: string;
-	/** Account discovery helper, e.g. `buxfer_listAccounts_Buxfer_Expenses`. */
+	/** Account discovery helper, e.g. `listAccounts_Buxfer_Expenses`. */
 	listAccounts: string;
-	/** Tag discovery helper, e.g. `buxfer_listTags_Buxfer_Expenses`. */
+	/** Tag discovery helper, e.g. `listTags_Buxfer_Expenses`. */
 	listTags: string;
 }
 
@@ -127,9 +127,12 @@ function withNodeSuffix(prefix: string, node: INode): string {
 
 /** Build the full set of tool names for a node instance and resource. */
 export function buildToolNames(node: INode, resource: string): ToolNames {
+	// No "buxfer_" prefix: the node name already carries the Buxfer branding
+	// (e.g. "Buxfer Expenses"), so prefixing would duplicate it. The resource is
+	// the functional identifier; the node name is the instance disambiguator.
 	return {
-		main: withNodeSuffix(`buxfer_${resource}_`, node),
-		listAccounts: withNodeSuffix('buxfer_listAccounts_', node),
-		listTags: withNodeSuffix('buxfer_listTags_', node),
+		main: withNodeSuffix(`${resource}_`, node),
+		listAccounts: withNodeSuffix('listAccounts_', node),
+		listTags: withNodeSuffix('listTags_', node),
 	};
 }
