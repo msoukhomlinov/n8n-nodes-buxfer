@@ -60,10 +60,11 @@ export function wrapSuccess(
 	resource: string,
 	operation: string,
 	result: Record<string, unknown>,
+	mainToolName?: string,
 ): SuccessEnvelope {
 	return {
 		schemaVersion: '1',
-		tool: toolName(resource),
+		tool: mainToolName ?? toolName(resource),
 		resource,
 		operation,
 		success: true,
@@ -78,10 +79,11 @@ export function wrapError(
 	message: string,
 	nextAction: string,
 	context?: Record<string, unknown>,
+	mainToolName?: string,
 ): ErrorEnvelope {
 	return {
 		schemaVersion: '1',
-		tool: toolName(resource),
+		tool: mainToolName ?? toolName(resource),
 		resource,
 		operation,
 		success: false,
@@ -101,6 +103,7 @@ export function formatApiError(
 	resource: string,
 	operation: string,
 	message: string,
+	mainToolName?: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
@@ -108,6 +111,8 @@ export function formatApiError(
 		ERROR_TYPES.API_ERROR,
 		message,
 		'Verify parameter names and values, then retry.',
+		undefined,
+		mainToolName,
 	);
 }
 
@@ -122,6 +127,8 @@ export function formatMissingIdError(
 		ERROR_TYPES.MISSING_ENTITY_ID,
 		`A numeric ID is required for ${operation}.`,
 		`Use ${mainToolName ?? `buxfer_${resource}`} with operation 'getAll' to find the ID first.`,
+		undefined,
+		mainToolName,
 	);
 }
 
@@ -137,6 +144,8 @@ export function formatNotFoundError(
 		ERROR_TYPES.ENTITY_NOT_FOUND,
 		`${resource} with id ${id} was not found.`,
 		`Verify the ID. Use ${mainToolName ?? `buxfer_${resource}`} with operation 'getAll' to list available ${resource}s.`,
+		undefined,
+		mainToolName,
 	);
 }
 
@@ -153,5 +162,6 @@ export function formatNoResultsFound(
 		`No ${resource}s matched the given filters.`,
 		`Broaden your filters or use ${mainToolName ?? `buxfer_${resource}`} with operation 'getAll' without filters to list all.`,
 		{ filtersUsed },
+		mainToolName,
 	);
 }

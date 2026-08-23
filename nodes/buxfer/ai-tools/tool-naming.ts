@@ -14,10 +14,11 @@
  * disambiguator — so renaming a node renames its tools, which is exactly what
  * the n8n collision error suggests ("please rename them to avoid conflicts").
  * We deliberately do NOT append a generated counter: the node name carries the
- * meaning, and a well-named node yields a fully descriptive tool name. Only
- * when the name is too long and must be truncated do we append a short hash of
- * the full original name — a last-resort discriminator so two distinct names
- * that share a long prefix cannot collapse into the same tool name.
+ * meaning, and a well-named node yields a fully descriptive tool name. A short
+ * hash of the full original name is appended only as a last-resort
+ * discriminator — when sanitization altered the name (punctuation/spacing
+ * variants collapse to the same string) or the name must be truncated (two
+ * distinct names sharing a long prefix would otherwise collide).
  */
 import crypto from 'crypto';
 import type { INode } from 'n8n-workflow';
@@ -92,31 +93,33 @@ function nodeNameHash(name: string): string {
  * MAX_TOOL_NAME_LENGTH. The prefix always ends in an underscore; if the
  * sanitized suffix is empty the trailing underscore is dropped.
  *
- * When the sanitized name fits within the budget it is kept exactly as-is —
- * purely informative, with no extra suffix. When it must be truncated, the
- * distinguishing tail would be discarded and two distinct names sharing a long
- * prefix would collide, so a short stable hash of the FULL original node name
- * is appended instead: `<prefix><truncatedName>_<hash>`. The hash also
- * captures punctuation/spacing differences that sanitization collapses, and
- * the total length still never exceeds MAX_TOOL_NAME_LENGTH.
+ * The sanitized name is kept exactly as-is (purely informative, no extra
+ * suffix) only when it is already in canonical form — sanitization left it
+ * unchanged — AND it fits the budget. Otherwise a short stable hash of the
+ * FULL original node name is appended: `<prefix><truncatedName>_<hash>`.
+ * The hash is needed whenever sanitization altered the name (punctuation and
+ * spacing variants collapse to the same string, e.g. "Buxfer Expenses" and
+ * "Buxfer_Expenses") or the name must be truncated (the distinguishing tail
+ * would be discarded, so two distinct names sharing a long prefix would
+ * collide). The hash of the full original name captures both cases, and the
+ * total length still never exceeds MAX_TOOL_NAME_LENGTH.
  */
 function withNodeSuffix(prefix: string, node: INode): string {
-	const suffix = sanitizeNodeName(node.name);
+	const original = node.name;
+	const suffix = sanitizeNodeName(original);
 	const budget = MAX_TOOL_NAME_LENGTH - prefix.length;
 	if (budget <= 0) return prefix.slice(0, MAX_TOOL_NAME_LENGTH);
 	if (!suffix) return prefix.replace(/[_-]+$/, '');
-	if (suffix.length <= budget) return `${prefix}${suffix}`;
-
-	// Truncation would discard the part that distinguishes this node from
-	// another with the same long prefix — append a stable hash discriminator
-	// instead so the names stay unique.
-	const hash = nodeNameHash(node.name);
+	// A name is unambiguous only when sanitization left it unchanged (already
+	// canonical) AND it fits the budget. Otherwise two distinct node names can
+	// map to the same suffix (sanitization collapses punctuation/spacing
+	// variants; truncation discards the tail) — append a stable hash of the
+	// FULL original name so the tool names stay unique.
+	const needsDiscriminator = suffix !== original || suffix.length > budget;
+	if (!needsDiscriminator) return `${prefix}${suffix}`;
+	const hash = nodeNameHash(original);
 	const nameBudget = budget - DISCRIMINATOR_LENGTH;
-	if (nameBudget <= 0) {
-		// The prefix leaves room for neither the name nor the full
-		// discriminator; degrade to as much of the hash as fits.
-		return `${prefix}${hash.slice(0, budget)}`;
-	}
+	if (nameBudget <= 0) return `${prefix}${hash.slice(0, budget)}`;
 	const truncated = suffix.slice(0, nameBudget).replace(/[_-]+$/, '');
 	const s = truncated ? `${truncated}_${hash}` : hash;
 	return `${prefix}${s}`;

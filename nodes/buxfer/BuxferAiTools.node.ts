@@ -233,6 +233,8 @@ export class BuxferAiTools implements INodeType {
 							ERROR_TYPES.WRITE_OPERATION_BLOCKED,
 							'Write operations are disabled.',
 							'Enable allowWriteOperations on this node to use mutating operations.',
+							undefined,
+							names.main,
 						),
 					);
 				}
@@ -246,6 +248,8 @@ export class BuxferAiTools implements INodeType {
 							ERROR_TYPES.INVALID_OPERATION,
 							`Operation '${operation}' is not available.`,
 							`Available operations: ${effectiveOps.join(', ')}.`,
+							undefined,
+							names.main,
 						),
 					);
 				}
@@ -372,6 +376,8 @@ export class BuxferAiTools implements INodeType {
 								ERROR_TYPES.WRITE_OPERATION_BLOCKED,
 								'Write operations are disabled.',
 								'Enable allowWriteOperations on this node to use mutating operations.',
+								undefined,
+								names.main,
 							),
 						),
 					),
@@ -391,6 +397,8 @@ export class BuxferAiTools implements INodeType {
 								ERROR_TYPES.INVALID_OPERATION,
 								`Operation '${requestedOp}' is not available.`,
 								`Available operations: ${effectiveOps.join(', ')}.`,
+								undefined,
+								names.main,
 							),
 						),
 					),
