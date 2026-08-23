@@ -23,6 +23,10 @@ function debug(message: string, data?: any): void {
   }
 }
 
+function isN8nError(error: unknown): boolean {
+  return error instanceof NodeApiError || error instanceof NodeOperationError;
+}
+
 let tokenCache: string | null = null;
 let tokenExpiry: number | null = null;
 
@@ -50,24 +54,56 @@ export async function buxferApiLogin(context: IExecuteFunctions | ILoadOptionsFu
       method: 'POST',
       url: 'https://www.buxfer.com/api/login',
       body: params,
-    })) as BuxferLoginResponse;
+      ignoreHttpStatusErrors: true,
+      returnFullResponse: true,
+    })) as IN8nHttpFullResponse;
 
-    debug('Login response', {
-      dataKeys: Object.keys(response || {}),
-      hasResponse: !!response?.response,
-      hasToken: !!response?.response?.token
+    debug('Login response', { status: response.statusCode });
+
+    if (response.statusCode === 429) {
+      context.logger.error('Login rate limit exceeded');
+      throw new NodeOperationError(
+        context.getNode(),
+        'Rate limit exceeded. Please try again later.'
+      );
+    }
+
+    if (response.statusCode >= 400) {
+      let bodyPreview = '';
+      if (response.body !== null && response.body !== undefined) {
+        try {
+          const raw = typeof response.body === 'string' ? response.body : JSON.stringify(response.body);
+          if (raw) {
+            bodyPreview = ` (body: ${raw.substring(0, 200)})`;
+          }
+        } catch {
+          // Ignore preview serialization failures
+        }
+      }
+      context.logger.error('Login failed', { statusCode: response.statusCode });
+      throw new NodeApiError(context.getNode(), { message: `Login failed: HTTP ${response.statusCode}${bodyPreview}` });
+    }
+
+    const body = response.body as BuxferLoginResponse;
+    debug('Login response body', {
+      dataKeys: Object.keys(body || {}),
+      hasResponse: !!body?.response,
+      hasToken: !!body?.response?.token
     });
 
-    if (response?.response?.token) {
-      tokenCache = response.response.token;
+    if (body?.response?.token) {
+      tokenCache = body.response.token;
       tokenExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
       debug('Login successful - token cached');
       return tokenCache;
     }
 
-    debug('Login failed - invalid response structure', response);
+    debug('Login failed - invalid response structure', body);
     throw new NodeApiError(context.getNode(), { message: 'Login failed: Invalid response from Buxfer API' });
   } catch (error) {
+    if (isN8nError(error)) {
+      throw error;
+    }
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     context.logger.error('Login failed', { message: errorMessage });
     throw new NodeApiError(
@@ -179,23 +215,32 @@ export async function buxferApiRequest(
       debug('Retry successful');
     }
   } catch (error) {
+    if (isN8nError(error)) {
+      throw error;
+    }
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    context.logger.error('Buxfer API request failed', { message: errorMessage });
+    context.logger.error('Buxfer API request failed', { message: errorMessage, method, endpoint });
     throw new NodeOperationError(
       context.getNode(),
       `Buxfer API request failed: ${errorMessage}`
     );
   }
 
+  let dataPreview = '';
+  try {
+    dataPreview = JSON.stringify(response.body, null, 2)?.substring(0, 500) + '...';
+  } catch {
+    // Ignore preview serialization failures
+  }
   debug('API response', {
     status: response.statusCode,
     statusText: response.statusMessage,
     dataKeys: response.body && typeof response.body === 'object' ? Object.keys(response.body as object) : [],
-    dataPreview: JSON.stringify(response.body, null, 2)?.substring(0, 500) + '...'
+    dataPreview
   });
 
   if (response.statusCode === 429) {
-    context.logger.error('Rate limit exceeded');
+    context.logger.error('Rate limit exceeded', { method, endpoint });
     throw new NodeOperationError(
       context.getNode(),
       'Rate limit exceeded. Please try again later.'
@@ -214,6 +259,7 @@ export async function buxferApiRequest(
         // Ignore preview serialization failures
       }
     }
+    context.logger.error('Buxfer API request failed', { statusCode: response.statusCode, method, endpoint });
     throw new NodeOperationError(
       context.getNode(),
       `Buxfer API request failed: HTTP ${response.statusCode}${bodyPreview}`
