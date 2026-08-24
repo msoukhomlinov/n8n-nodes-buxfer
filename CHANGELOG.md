@@ -6,6 +6,7 @@ All notable changes to the n8n-nodes-buxfer project will be documented in this f
 
 ### Fixed
 - **AI Tools – Operations field for Transaction when write operations are disabled**: With 'Allow Write Operations' off, the node UI now shows the Operations field with 'Get All', mirroring the 0.5.2 fix for read-only resources. Previously no Operations field appeared for Transaction in that mode, although the node exposes `getAll` to MCP/agents. The 0.5.1 'hide the field' wording in the changelog is superseded by this entry.
+- **AI Tools – explicit operation selection honored**: With write operations disabled, the stored Operations selection is now honored (including an empty selection, which triggers the standard 'No operations selected' validation). The implicit `getAll` fallback applies only to legacy workflows saved while the field was hidden.
 
 ## [0.6.1] - 2026-08-23
 
