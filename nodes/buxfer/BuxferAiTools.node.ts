@@ -160,6 +160,23 @@ export class BuxferAiTools implements INodeType {
 					},
 				},
 			},
+			{
+				displayName: 'Operations',
+				name: 'operations',
+				type: 'multiOptions',
+				description: 'Which operations to expose to the AI agent',
+				noDataExpression: true,
+				options: [
+					{ name: 'Get All', value: 'getAll' },
+				],
+				default: ['getAll'],
+				displayOptions: {
+					show: {
+						resource: ['transaction'],
+						allowWriteOperations: [false],
+					},
+				},
+			},
 		],
 	};
 
