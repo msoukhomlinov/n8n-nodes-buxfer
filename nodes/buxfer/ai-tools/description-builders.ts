@@ -4,31 +4,32 @@
  * Descriptions are the primary mechanism for guiding the LLM.
  * Keep unified descriptions under ~2000 characters per tool.
  */
+import type { ToolNames } from './tool-naming.js';
 
 // ---------------------------------------------------------------------------
 // Per-operation description builders
 // ---------------------------------------------------------------------------
 
-function buildGetAllDescription(resource: string): string {
+function buildGetAllDescription(resource: string, names: ToolNames): string {
 	if (resource === 'transaction') {
 		return [
 			`List/search transactions.`,
 			`ALWAYS use 'search' first for text lookups — it does partial matching on descriptions.`,
 			`Results contain numeric 'id' — capture it for chained get/update/delete calls.`,
-			`Use buxfer_listAccounts and buxfer_listTags to discover valid filter values.`,
+			`Use ${names.listAccounts} and ${names.listTags} to discover valid filter values.`,
 			`Default limit is 25 — increase to 100 if you expect many results.`,
 		].join(' ');
 	}
 	return `List all ${resource}s. Results contain numeric 'id' fields for reference.`;
 }
 
-function buildCreateDescription(): string {
+function buildCreateDescription(names: ToolNames): string {
 	return [
 		`Create a new transaction.`,
 		`Required fields: description (string), amount (number), date (YYYY-MM-DD),`,
-		`accountId (number — use buxfer_listAccounts), type (expense|income|transfer|sharedBill|loan|paidForFriend),`,
+		`accountId (number — use ${names.listAccounts}), type (expense|income|transfer|sharedBill|loan|paidForFriend),`,
 		`status (cleared|pending).`,
-		`Tags: comma-separated names (use buxfer_listTags to discover valid names).`,
+		`Tags: comma-separated names (use ${names.listTags} to discover valid names).`,
 		`Confirm field values with user before executing when acting autonomously.`,
 		`Returns assigned 'id'.`,
 	].join(' ');
@@ -60,6 +61,7 @@ function buildDeleteDescription(): string {
 export function buildUnifiedDescription(
 	resource: string,
 	operations: string[],
+	names: ToolNames,
 ): string {
 	if (resource === 'transaction') {
 		const parts: string[] = [
@@ -67,10 +69,10 @@ export function buildUnifiedDescription(
 		];
 
 		if (operations.includes('getAll')) {
-			parts.push(`• getAll: ${buildGetAllDescription(resource)}`);
+			parts.push(`• getAll: ${buildGetAllDescription(resource, names)}`);
 		}
 		if (operations.includes('create')) {
-			parts.push(`• create: ${buildCreateDescription()}`);
+			parts.push(`• create: ${buildCreateDescription(names)}`);
 		}
 		if (operations.includes('update')) {
 			parts.push(`• update: ${buildUpdateDescription()}`);
@@ -83,7 +85,7 @@ export function buildUnifiedDescription(
 	}
 
 	// Read-only resources
-	return `Buxfer ${resource} tool. ${buildGetAllDescription(resource)}`;
+	return `Buxfer ${resource} tool. ${buildGetAllDescription(resource, names)}`;
 }
 
 // ---------------------------------------------------------------------------

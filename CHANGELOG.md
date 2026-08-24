@@ -2,6 +2,13 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## [0.6.1] - 2026-08-23
+
+### Fixed
+- **AI Tools – duplicate tool name collision**: Connecting more than one `Buxfer AI Tools` node to the same AI Agent failed with `You have multiple tools with the same name: 'buxfer_listAccounts'`. Every node exposed the discovery helpers under fixed names, so any two nodes collided — even with different resources.
+- **AI Tools – resource-scoped tool names**: Discovery helper tools are now scoped by resource: `buxfer_listAccounts_{resource}` and `buxfer_listTags_{resource}` (main tool stays `buxfer_{resource}`, unchanged). Two nodes with different resources on the same agent no longer collide. Two nodes configured with the *same* resource still collide — n8n's own duplicate-tool-name error covers that case, which is an accepted limitation rather than something this node works around.
+- **AI Tools – envelope + hints use the registered name**: The response envelope's `tool` field and all LLM-facing descriptions/error hints now reference the actual registered tool name (previously a stale `buxfer_{resource}` identifier for the helper tools, which never matched their registered names).
+
 ## [0.6.0] - 2026-08-23
 
 ### Changed

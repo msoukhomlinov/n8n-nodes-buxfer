@@ -34,8 +34,6 @@ export interface ErrorEnvelope extends ToolEnvelope {
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
-const TOOL_NAME_PREFIX = 'buxfer';
-
 export const ERROR_TYPES = {
 	API_ERROR: 'API_ERROR',
 	ENTITY_NOT_FOUND: 'ENTITY_NOT_FOUND',
@@ -52,18 +50,15 @@ export const ERROR_TYPES = {
 // ---------------------------------------------------------------------------
 // Factories
 // ---------------------------------------------------------------------------
-function toolName(resource: string): string {
-	return `${TOOL_NAME_PREFIX}_${resource}`;
-}
-
 export function wrapSuccess(
 	resource: string,
 	operation: string,
 	result: Record<string, unknown>,
+	mainToolName: string,
 ): SuccessEnvelope {
 	return {
 		schemaVersion: '1',
-		tool: toolName(resource),
+		tool: mainToolName,
 		resource,
 		operation,
 		success: true,
@@ -77,11 +72,12 @@ export function wrapError(
 	errorType: string,
 	message: string,
 	nextAction: string,
-	context?: Record<string, unknown>,
+	context: Record<string, unknown> | undefined,
+	mainToolName: string,
 ): ErrorEnvelope {
 	return {
 		schemaVersion: '1',
-		tool: toolName(resource),
+		tool: mainToolName,
 		resource,
 		operation,
 		success: false,
@@ -101,6 +97,7 @@ export function formatApiError(
 	resource: string,
 	operation: string,
 	message: string,
+	mainToolName: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
@@ -108,19 +105,24 @@ export function formatApiError(
 		ERROR_TYPES.API_ERROR,
 		message,
 		'Verify parameter names and values, then retry.',
+		undefined,
+		mainToolName,
 	);
 }
 
 export function formatMissingIdError(
 	resource: string,
 	operation: string,
+	mainToolName: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
 		operation,
 		ERROR_TYPES.MISSING_ENTITY_ID,
 		`A numeric ID is required for ${operation}.`,
-		`Use buxfer_${resource} with operation 'getAll' to find the ID first.`,
+		`Use ${mainToolName} with operation 'getAll' to find the ID first.`,
+		undefined,
+		mainToolName,
 	);
 }
 
@@ -128,13 +130,16 @@ export function formatNotFoundError(
 	resource: string,
 	operation: string,
 	id: number | string,
+	mainToolName: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
 		operation,
 		ERROR_TYPES.ENTITY_NOT_FOUND,
 		`${resource} with id ${id} was not found.`,
-		`Verify the ID. Use buxfer_${resource} with operation 'getAll' to list available ${resource}s.`,
+		`Verify the ID. Use ${mainToolName} with operation 'getAll' to list available ${resource}s.`,
+		undefined,
+		mainToolName,
 	);
 }
 
@@ -142,13 +147,15 @@ export function formatNoResultsFound(
 	resource: string,
 	operation: string,
 	filtersUsed: Record<string, unknown>,
+	mainToolName: string,
 ): ErrorEnvelope {
 	return wrapError(
 		resource,
 		operation,
 		ERROR_TYPES.NO_RESULTS_FOUND,
 		`No ${resource}s matched the given filters.`,
-		`Broaden your filters or use buxfer_${resource} with operation 'getAll' without filters to list all.`,
+		`Broaden your filters or use ${mainToolName} with operation 'getAll' without filters to list all.`,
 		{ filtersUsed },
+		mainToolName,
 	);
 }

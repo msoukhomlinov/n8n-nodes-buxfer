@@ -6,6 +6,7 @@
  */
 import type { IExecuteFunctions, ISupplyDataFunctions } from 'n8n-workflow';
 import { buxferApiRequest } from '../api.js';
+import type { ToolNames } from './tool-naming.js';
 import {
 	wrapSuccess,
 	wrapError,
@@ -63,6 +64,7 @@ export async function executeAiTool(
 	resource: string,
 	operation: string,
 	params: Record<string, unknown>,
+	names: ToolNames,
 ): Promise<string> {
 	// Strip n8n metadata at entry — before any routing
 	const cleanParams = stripMetadata(params);
@@ -86,7 +88,9 @@ export async function executeAiTool(
 							operation,
 							ERROR_TYPES.INVALID_OPERATION,
 							`Operation '${operation}' is not valid for ${resource}. Only 'getAll' is supported.`,
-							`Use buxfer_${resource} with operation 'getAll'.`,
+							`Use ${names.main} with operation 'getAll'.`,
+							undefined,
+							names.main,
 						),
 					);
 				}
@@ -101,7 +105,7 @@ export async function executeAiTool(
 					wrapSuccess(resource, operation, {
 						items,
 						count: items.length,
-					}),
+					}, names.main),
 				);
 			}
 
@@ -159,7 +163,7 @@ export async function executeAiTool(
 						// Filtered empty guard
 						if (hasFilters && transactions.length === 0) {
 							return JSON.stringify(
-								formatNoResultsFound(resource, operation, cleanParams),
+								formatNoResultsFound(resource, operation, cleanParams, names.main),
 							);
 						}
 
@@ -168,7 +172,7 @@ export async function executeAiTool(
 								items: transactions,
 								count: transactions.length,
 								...(truncated ? { truncated: true } : {}),
-							}),
+							}, names.main),
 						);
 					}
 
@@ -178,27 +182,27 @@ export async function executeAiTool(
 						// Required fields
 						if (!cleanParams.description)
 							return JSON.stringify(
-								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'description is required.', 'Provide the description field.'),
+								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'description is required.', 'Provide the description field.', undefined, names.main),
 							);
 						if (cleanParams.amount === undefined)
 							return JSON.stringify(
-								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'amount is required.', 'Provide the amount field.'),
+								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'amount is required.', 'Provide the amount field.', undefined, names.main),
 							);
 						if (!cleanParams.date)
 							return JSON.stringify(
-								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'date is required (YYYY-MM-DD).', 'Provide the date field.'),
+								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'date is required (YYYY-MM-DD).', 'Provide the date field.', undefined, names.main),
 							);
 						if (!cleanParams.accountId)
 							return JSON.stringify(
-								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'accountId is required.', 'Use buxfer_listAccounts to find the correct account ID.'),
+								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'accountId is required.', `Use ${names.listAccounts} to find the correct account ID.`, undefined, names.main),
 							);
 						if (!cleanParams.type)
 							return JSON.stringify(
-								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'type is required.', 'Provide type: expense, income, transfer, sharedBill, loan, or paidForFriend.'),
+								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'type is required.', 'Provide type: expense, income, transfer, sharedBill, loan, or paidForFriend.', undefined, names.main),
 							);
 						if (!cleanParams.status)
 							return JSON.stringify(
-								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'status is required.', 'Provide status: cleared or pending.'),
+								wrapError(resource, operation, ERROR_TYPES.MISSING_REQUIRED_FIELD, 'status is required.', 'Provide status: cleared or pending.', undefined, names.main),
 							);
 
 						data.description = cleanParams.description;
@@ -227,13 +231,13 @@ export async function executeAiTool(
 						);
 						const created = result?.response || {};
 						return JSON.stringify(
-							wrapSuccess(resource, operation, created),
+							wrapSuccess(resource, operation, created, names.main),
 						);
 					}
 
 					case 'update': {
 						if (!cleanParams.id) {
-							return JSON.stringify(formatMissingIdError(resource, operation));
+							return JSON.stringify(formatMissingIdError(resource, operation, names.main));
 						}
 
 						const data: Record<string, unknown> = {
@@ -273,13 +277,13 @@ export async function executeAiTool(
 						);
 						const updated = result?.response || {};
 						return JSON.stringify(
-							wrapSuccess(resource, operation, updated),
+							wrapSuccess(resource, operation, updated, names.main),
 						);
 					}
 
 					case 'delete': {
 						if (!cleanParams.id) {
-							return JSON.stringify(formatMissingIdError(resource, operation));
+							return JSON.stringify(formatMissingIdError(resource, operation, names.main));
 						}
 
 						await buxferApiRequest(context as any, 'POST', '/transaction_delete', {
@@ -289,7 +293,7 @@ export async function executeAiTool(
 							wrapSuccess(resource, operation, {
 								id: cleanParams.id,
 								deleted: true,
-							}),
+							}, names.main),
 						);
 					}
 
@@ -301,6 +305,8 @@ export async function executeAiTool(
 								ERROR_TYPES.INVALID_OPERATION,
 								`Unknown operation '${operation}' for transaction.`,
 								`Valid operations: getAll, create, update, delete.`,
+								undefined,
+								names.main,
 							),
 						);
 				}
@@ -314,6 +320,8 @@ export async function executeAiTool(
 						ERROR_TYPES.INVALID_OPERATION,
 						`Unknown resource '${resource}'.`,
 						'Valid resources: account, budget, contact, group, loan, reminder, tag, transaction.',
+						undefined,
+						names.main,
 					),
 				);
 		}
@@ -331,12 +339,14 @@ export async function executeAiTool(
 					ERROR_TYPES.INTERNAL_ERROR,
 					(error as Error).message,
 					'This appears to be a bug in the tool. Do not retry with the same parameters.',
+					undefined,
+					names.main,
 				),
 			);
 		}
 
 		return JSON.stringify(
-			formatApiError(resource, operation, (error as Error).message),
+			formatApiError(resource, operation, (error as Error).message, names.main),
 		);
 	}
 }
