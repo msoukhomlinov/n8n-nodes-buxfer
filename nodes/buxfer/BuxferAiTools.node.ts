@@ -160,6 +160,23 @@ export class BuxferAiTools implements INodeType {
 					},
 				},
 			},
+			{
+				displayName: 'Operations',
+				name: 'operations',
+				type: 'multiOptions',
+				description: 'Which operations to expose to the AI agent',
+				noDataExpression: true,
+				options: [
+					{ name: 'Get All', value: 'getAll' },
+				],
+				default: ['getAll'],
+				displayOptions: {
+					show: {
+						resource: ['transaction'],
+						allowWriteOperations: [false],
+					},
+				},
+			},
 		],
 	};
 
@@ -182,12 +199,16 @@ export class BuxferAiTools implements INodeType {
 				? (this.getNodeParameter('allowWriteOperations', 0, false) as boolean)
 				: false;
 
-		// When write ops are disabled for transaction, the Operations field is hidden —
-		// n8n returns its default which includes write ops. Short-circuit to avoid
-		// relying solely on effectiveOps filtering to make selectedOps semantically correct.
+		// Since the Operations field is visible for transaction with writes disabled,
+		// a stored value (even an empty one) is the user's explicit selection — honor it.
+		// Fall back to getAll only for legacy workflows saved while the field was hidden
+		// (no stored value at all; n8n's default for the hidden field included write ops).
+		const storedOps = ((this.getNode().parameters ?? {}) as IDataObject).operations;
 		const selectedOps =
 			resource === 'transaction' && !allowWriteOperations
-				? ['getAll']
+				? Array.isArray(storedOps)
+					? (storedOps as string[])
+					: ['getAll']
 				: (this.getNodeParameter('operations', 0) as string[]);
 
 		const effectiveOps = allowWriteOperations
@@ -333,9 +354,15 @@ export class BuxferAiTools implements INodeType {
 				? (this.getNodeParameter('allowWriteOperations', 0, false) as boolean)
 				: false;
 
+		// Same selection semantics as supplyData(): honor the stored Operations value
+		// (even empty) for transaction with writes disabled; fall back to getAll only
+		// for legacy workflows saved while the field was hidden.
+		const storedOps = ((this.getNode().parameters ?? {}) as IDataObject).operations;
 		const selectedOps =
 			resource === 'transaction' && !allowWriteOperations
-				? ['getAll']
+				? Array.isArray(storedOps)
+					? (storedOps as string[])
+					: ['getAll']
 				: (this.getNodeParameter('operations', 0) as string[]);
 
 		const effectiveOps = allowWriteOperations
