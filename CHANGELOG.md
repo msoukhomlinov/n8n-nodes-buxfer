@@ -2,6 +2,24 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## [0.7.0] - 2026-10-17
+
+### Added
+- **AI Tools – `aggregate` operation for the Transaction tool**: compute spending totals in a single call instead of fetching raw transactions. `groupBy` tag, account, type, day, week or month (omit for a grand total); combines with `search`/`startDate`/`endDate`/`accountId`/`tagName`. Returns per-group `spent`/`earned`/`net`/`count` plus the largest sample transactions (`topN`, default 3) and a `coverage` block. Aggregation scans the full filtered window (paged) so totals are exact over the window — e.g. "how much did I spend on Qantas in the last 30 days?" or "total this month by tag" is now one tool call.
+- **AI Tools – fuzzy search**: `getAll` `search` matches all terms case-insensitively (exact substring first). Retry with `fuzzy=true` (or it is applied automatically when an exact search finds nothing) to tolerate typos and abbreviations via near-word matching; fuzzy matches are flagged (`match: "fuzzy"`) and reported in `coverage.matchCounts`/`fuzzyFallback`.
+- **AI Tools – result enrichment**: `getAll` results carry resolved `tagNames` (Buxfer returns tag IDs), so agents can answer "by category" questions without extra lookups.
+
+### Changed
+- **AI Tools – tool surface trimmed**: the `listAccounts`/`listTags` discovery helper tools are now only exposed by the Transaction resource node. Account/Tag (and other read-only resource) nodes no longer emit redundant helpers such as `buxfer_listAccounts_tag` — a 3-node setup now publishes 5 tools instead of 9.
+- **AI Tools – efficiency**: transaction window scans page in parallel batches of 4 (early stop on a short page), cutting search/aggregate latency; any window scan reports `scanned`/`pages` coverage, and a bare no-filter call self-declares that it only scanned the 100 most recent transactions.
+- **AI Tools – debug logging off by default**: the verbose `[Buxfer Debug]` console logging is now opt-in via the `BUXFER_DEBUG=true` environment variable.
+- `aggregate` is included in the default Operations selection for the Transaction resource.
+
+### Fixed
+- **AI Tools – schema degrades fixed for n8n >= 2.x installs**: runtime zod is now resolved from the copy n8n's own converters `instanceof`-check against (consumer-copy rule), and `require.main` is realpath'd first so homebrew/npm global bin shims resolve correctly. Previously, on some layouts, the published `inputSchema` silently degraded (raw schema dump / empty object) and models could not see tool parameters.
+- **AI Tools – search pagination coverage**: client-side `search` now pages through the server-filtered window (capped at 2000 transactions) instead of scanning only the first page, and reports `scanTruncated` when the cap is hit, so "not found" answers are no longer silently incomplete.
+- **Security – dev toolchain**: `js-yaml` (transitive via eslint) updated 4.1.0 → 4.3.2 (CVE-2026-84375 / GHSA-2883-xcg3-v3hh) and `brace-expansion` updated 1.1.12 → 1.1.21 and 2.0.2 → 2.1.7 (CVE-2026-102277 / GHSA-q2hr-2g5m-vwhr), resolving the open dependabot security alerts. Dev-scope only — no runtime dependencies changed.
+
 ## [0.6.2] - 2026-08-24
 
 ### Fixed

@@ -8,8 +8,10 @@ import type {
 } from 'n8n-workflow';
 import { NodeOperationError, NodeApiError } from 'n8n-workflow';
 
-// Debug flag - set to true to enable console logging
-const DEBUG_ENABLED = true;
+// Debug flag - off by default; opt in per instance with BUXFER_DEBUG=true
+// (logs are verbose: request/response previews on every API call).
+const DEBUG_ENABLED =
+	process.env.BUXFER_DEBUG === 'true' || process.env.BUXFER_DEBUG === '1';
 
 function debug(message: string, data?: any): void {
   if (DEBUG_ENABLED) {

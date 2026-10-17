@@ -149,12 +149,20 @@ export function formatNoResultsFound(
 	filtersUsed: Record<string, unknown>,
 	mainToolName: string,
 ): ErrorEnvelope {
+	const searchUsed =
+		typeof filtersUsed?.search === 'string' && (filtersUsed.search as string).length > 0;
+	const tagUsed =
+		typeof filtersUsed?.tagName === 'string' && (filtersUsed.tagName as string).length > 0;
+	const nextAction =
+		searchUsed || tagUsed
+			? 'No matches (exact). Fuzzy rescue has already been attempted automatically when applicable. Try a different or broader term, or check valid values (tag names via the listTags helper, account IDs via the listAccounts helper).'
+			: `Broaden your filters or use ${mainToolName} with operation 'getAll' without filters to list all.`;
 	return wrapError(
 		resource,
 		operation,
 		ERROR_TYPES.NO_RESULTS_FOUND,
 		`No ${resource}s matched the given filters.`,
-		`Broaden your filters or use ${mainToolName} with operation 'getAll' without filters to list all.`,
+		nextAction,
 		{ filtersUsed },
 		mainToolName,
 	);

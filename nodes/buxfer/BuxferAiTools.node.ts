@@ -148,11 +148,12 @@ export class BuxferAiTools implements INodeType {
 				noDataExpression: true,
 				options: [
 					{ name: 'Get All', value: 'getAll' },
+					{ name: 'Aggregate (totals)', value: 'aggregate' },
 					{ name: 'Create', value: 'create' },
 					{ name: 'Update', value: 'update' },
 					{ name: 'Delete', value: 'delete' },
 				],
-				default: ['getAll', 'create', 'update', 'delete'],
+				default: ['getAll', 'aggregate', 'create', 'update', 'delete'],
 				displayOptions: {
 					show: {
 						resource: ['transaction'],
@@ -168,8 +169,9 @@ export class BuxferAiTools implements INodeType {
 				noDataExpression: true,
 				options: [
 					{ name: 'Get All', value: 'getAll' },
+					{ name: 'Aggregate (totals)', value: 'aggregate' },
 				],
-				default: ['getAll'],
+				default: ['getAll', 'aggregate'],
 				displayOptions: {
 					show: {
 						resource: ['transaction'],
@@ -282,13 +284,25 @@ export class BuxferAiTools implements INodeType {
 			},
 		}) as unknown as DynamicStructuredTool;
 
-		// Build discovery helper tools
+		// Build discovery helper tools.
+		// Transaction is the only resource that needs account/tag discovery for
+		// its filter parameters — emitting helpers for every resource inflated
+		// the tool surface (e.g. buxfer_listAccounts_tag) with zero benefit.
 		const helperTools: DynamicStructuredTool[] = [];
+		if (resource !== 'transaction') {
+			return {
+				response: [unifiedTool],
+			};
+		}
 
 		const listAccountsTool = new RuntimeDynamicStructuredTool({
 			name: names.listAccounts,
 			description: buildListAccountsDescription(),
-			schema: runtimeZod.object({}) as any,
+			// strict(): reject unexpected args at the MCP validation layer. A
+			// plain z.object({}) is non-strict and silently strips unknown keys
+			// BEFORE func() runs, so any func-level guard is unreachable
+			// (round-4 tester finding: W2 guard was structurally dead).
+			schema: runtimeZod.object({}).strict() as any,
 			metadata: {
 				annotations: MCP_ANNOTATIONS_BY_OPERATION.getAll,
 			},
@@ -312,7 +326,8 @@ export class BuxferAiTools implements INodeType {
 		const listTagsTool = new RuntimeDynamicStructuredTool({
 			name: names.listTags,
 			description: buildListTagsDescription(),
-			schema: runtimeZod.object({}) as any,
+			// strict(): see the listAccounts note above.
+			schema: runtimeZod.object({}).strict() as any,
 			metadata: {
 				annotations: MCP_ANNOTATIONS_BY_OPERATION.getAll,
 			},
