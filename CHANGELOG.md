@@ -2,6 +2,8 @@
 
 All notable changes to the n8n-nodes-buxfer project will be documented in this file.
 
+## Unreleased
+
 ## [0.7.0] - 2026-10-17
 
 ### Added
